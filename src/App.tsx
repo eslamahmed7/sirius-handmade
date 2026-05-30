@@ -47,7 +47,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function PWARegistrar() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
+      if (import.meta.env.PROD) {
+        navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {});
+      } else {
+        // In development, unregister any active service worker to prevent caching issues
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
     }
   }, []);
   return null;
@@ -74,7 +83,7 @@ function AuthCallbackHandler() {
 
 export default function App() {
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <BrowserRouter basename={import.meta.env.BASE_URL} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ThemeProvider>
         <AuthProvider>
           <CartProvider>
