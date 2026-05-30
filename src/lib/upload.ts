@@ -1,8 +1,8 @@
 import { supabaseUrl, supabaseAnonKey } from './supabase';
 
 export async function uploadImage(file: File): Promise<string | null> {
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dhq9gptub';
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'market';
 
   // Try direct Cloudinary upload if config is present
   if (cloudName && uploadPreset) {
