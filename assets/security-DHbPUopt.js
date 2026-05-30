@@ -1,0 +1,1 @@
+function e(e){return String(e).replace(/[<>"'&]/g,``).trim()}function t(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)}function n(e){return/^[\d\s+()-]{7,15}$/.test(e)}function r(e){let t=[];return e.length<6&&t.push(`كلمة المرور يجب أن تكون 6 أحرف على الأقل`),e.length>128&&t.push(`كلمة المرور طويلة جداً`),{valid:t.length===0,errors:t}}export{n as i,t as n,r,e as t};

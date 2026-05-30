@@ -1,0 +1,1 @@
+var e={new:{ar:`جديد`,en:`New`},processing:{ar:`قيد المعالجة`,en:`Processing`},shipped:{ar:`تم الشحن`,en:`Shipped`},delivered:{ar:`تم التوصيل`,en:`Delivered`},cancelled:{ar:`ملغي`,en:`Cancelled`}};export{e as t};
