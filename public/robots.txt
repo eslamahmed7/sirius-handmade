@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /profile
+Disallow: /orders
+Disallow: /favorites
+Disallow: /cart
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://siriushandmade.com/sitemap.xml

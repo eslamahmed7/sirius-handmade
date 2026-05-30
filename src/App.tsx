@@ -1,0 +1,127 @@
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { FavoritesProvider } from './contexts/FavoritesContext';
+import { NotificationsProvider } from './contexts/NotificationsContext';
+import { RealtimeOrdersProvider } from './contexts/RealtimeOrdersContext';
+import { ToastProvider, useToast } from './components/ui/Toast';
+import { PageLoader } from './components/ui/LoadingSpinner';
+
+// Eager-loaded (critical path)
+import Layout from './components/layout/Layout';
+import AdminLayout from './components/admin/AdminLayout';
+import HomePage from './pages/HomePage';
+
+// Lazy-loaded public pages
+const ProductsPage = lazy(() => import('./pages/ProductsPage'));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
+const CartPage = lazy(() => import('./pages/CartPage'));
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
+const OrdersPage = lazy(() => import('./pages/OrdersPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+
+// Lazy-loaded admin pages
+const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
+const AdminAnalyticsPage = lazy(() => import('./pages/admin/AdminAnalyticsPage'));
+const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage'));
+const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'));
+const AdminOrdersPage = lazy(() => import('./pages/admin/AdminOrdersPage'));
+const AdminDiscountsPage = lazy(() => import('./pages/admin/AdminDiscountsPage'));
+const AdminCustomersPage = lazy(() => import('./pages/admin/AdminCustomersPage'));
+const AdminReviewsPage = lazy(() => import('./pages/admin/AdminReviewsPage'));
+const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettingsPage'));
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return <PageLoader />;
+  if (!user) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+function PWARegistrar() {
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  }, []);
+  return null;
+}
+
+function AuthCallbackHandler() {
+  const { showToast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=signup')) {
+      setTimeout(() => {
+        showToast('تم تأكيد بريدك الإلكتروني بنجاح! مرحباً بك في سيريوس ✨', 'success');
+      }, 500);
+      window.history.replaceState(null, '', location.pathname + location.search);
+      navigate('/', { replace: true });
+    }
+  }, [location, navigate, showToast]);
+
+  return null;
+}
+
+export default function App() {
+  return (
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ThemeProvider>
+        <AuthProvider>
+          <CartProvider>
+            <FavoritesProvider>
+              <NotificationsProvider>
+                <RealtimeOrdersProvider>
+                  <ToastProvider>
+                <PWARegistrar />
+                <AuthCallbackHandler />
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route element={<Layout />}>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/products" element={<ProductsPage />} />
+                      <Route path="/product/:slug" element={<ProductDetailPage />} />
+                      <Route path="/cart" element={<CartPage />} />
+                      <Route path="/favorites" element={<ProtectedRoute><FavoritesPage /></ProtectedRoute>} />
+                      <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+                      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route path="/register" element={<RegisterPage />} />
+                    </Route>
+
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<DashboardPage />} />
+                      <Route path="analytics" element={<AdminAnalyticsPage />} />
+                      <Route path="products" element={<AdminProductsPage />} />
+                      <Route path="categories" element={<AdminCategoriesPage />} />
+                      <Route path="orders" element={<AdminOrdersPage />} />
+                      <Route path="reviews" element={<AdminReviewsPage />} />
+                      <Route path="discounts" element={<AdminDiscountsPage />} />
+                      <Route path="customers" element={<AdminCustomersPage />} />
+                      <Route path="settings" element={<AdminSettingsPage />} />
+                    </Route>
+
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Suspense>
+                  </ToastProvider>
+                </RealtimeOrdersProvider>
+              </NotificationsProvider>
+            </FavoritesProvider>
+          </CartProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </BrowserRouter>
+  );
+}

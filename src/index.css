@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .font-cursive {
+    font-family: 'Great Vibes', cursive;
+  }
+}
+
+@layer base {
+  html {
+    direction: rtl;
+    font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+  }
+
+  body {
+    @apply bg-darkbg text-gray-100;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary-900 hover:bg-primary-700 rounded-full;
+  }
+}
+
+@layer components {
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
+@layer utilities {
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slide-up 0.2s ease-out;
+  }
+  
+  @keyframes twinkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(0.6); }
+  }
+  .animate-twinkle {
+    animation: twinkle 3s ease-in-out infinite;
+  }
+}

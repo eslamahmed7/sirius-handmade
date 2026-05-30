@@ -1,0 +1,16 @@
+{
+  "name": "Sirius Handmade - سيريوس هاند ميد",
+  "short_name": "Sirius",
+  "description": "متجر سيريوس هاند ميد للمنتجات اليدوية الفاخرة - مجوهرات الريزين، ديكورات منزلية، اكسسوارات وهدايا مميزة",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#059669",
+  "dir": "rtl",
+  "lang": "ar",
+  "orientation": "portrait-primary",
+  "icons": [],
+  "categories": ["shopping", "lifestyle"],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
