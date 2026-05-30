@@ -22,6 +22,13 @@ export default function Header() {
   const navigate = useNavigate();
   const notifRef = useRef<HTMLDivElement>(null);
 
+  const handleSignOut = async () => {
+    setUserMenuOpen(false);
+    setMobileOpen(false);
+    await signOut();
+    navigate('/');
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -105,7 +112,7 @@ export default function Header() {
                           </Link>
                         )}
                         <hr className="my-1 border-gray-200 dark:border-darkbg-lighter" />
-                        <button onClick={() => { setUserMenuOpen(false); signOut(); }} className="flex items-center gap-3 w-full px-4 py-2 text-sm text-rose-400 hover:bg-rose-900/20 text-right">
+                        <button onClick={handleSignOut} className="flex items-center gap-3 w-full px-4 py-2 text-sm text-rose-400 hover:bg-rose-900/20 text-right">
                           <LogOut size={16} /> تسجيل الخروج
                         </button>
                       </div>
@@ -171,7 +178,7 @@ export default function Header() {
                         </Link>
                       )}
                       <hr className="my-1 border-gray-200 dark:border-darkbg-lighter" />
-                      <button onClick={() => { setUserMenuOpen(false); signOut(); }} className="flex items-center gap-3 w-full px-4 py-2 text-sm text-rose-400 hover:bg-rose-900/20">
+                      <button onClick={handleSignOut} className="flex items-center gap-3 w-full px-4 py-2 text-sm text-rose-400 hover:bg-rose-900/20">
                         <LogOut size={16} /> تسجيل الخروج
                       </button>
                     </div>
@@ -254,7 +261,7 @@ export default function Header() {
                   </button>
                 </div>
 
-                <button onClick={() => { setMobileOpen(false); signOut(); }} className="flex items-center justify-center gap-2 w-full p-3 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/20 hover:border-rose-500 rounded-xl text-sm font-semibold transition-all">
+                <button onClick={handleSignOut} className="flex items-center justify-center gap-2 w-full p-3 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/20 hover:border-rose-500 rounded-xl text-sm font-semibold transition-all">
                   <LogOut size={18} />
                   <span>تسجيل الخروج</span>
                 </button>

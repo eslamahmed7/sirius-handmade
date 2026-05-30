@@ -93,8 +93,8 @@ export default function AdminDiscountsPage() {
     e.preventDefault();
     const discountData: Record<string, unknown> = {
       code: form.code.toUpperCase().trim(),
-      description_ar: form.description_ar,
-      description_en: form.description_en,
+      description_ar: form.description_ar.trim(),
+      description_en: form.description_en.trim() || '',
       discount_type: form.discount_type,
       discount_value: Number(form.discount_value),
       min_order_amount: Number(form.min_order_amount) || 0,

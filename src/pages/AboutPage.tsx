@@ -1,5 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import {
   Sparkles, Heart, Award, Users, Shield, Truck,
   RefreshCw, Headphones, ArrowLeft, Star,
@@ -78,6 +79,70 @@ export default function AboutPage() {
     return () => { document.head.removeChild(script); };
   }, [orgData]);
 
+  const [productImages, setProductImages] = useState<string[]>([
+    '/resin_art_1.png',
+    '/resin_art_2.png',
+    '/resin_art_3.png',
+    '/resin_art_4.png',
+  ]);
+  const [slotIndices, setSlotIndices] = useState([0, 0, 0, 0]);
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    async function loadImages() {
+      try {
+        const { data } = await supabase
+          .from('product_images')
+          .select('image_url')
+          .order('created_at', { ascending: false });
+        
+        const urls = data?.map(d => d.image_url).filter(Boolean) ?? [];
+        const fallbackUrls = [
+          '/resin_art_1.png',
+          '/resin_art_2.png',
+          '/resin_art_3.png',
+          '/resin_art_4.png',
+        ];
+        
+        let combined = [...urls];
+        if (combined.length < 12) {
+          combined = [...combined, ...fallbackUrls];
+        }
+        
+        while (combined.length < 4) {
+          combined = [...combined, ...fallbackUrls];
+        }
+        
+        setProductImages(combined);
+      } catch (error) {
+        console.error('Error loading product images:', error);
+      }
+    }
+    loadImages();
+  }, []);
+
+  useEffect(() => {
+    if (productImages.length < 4) return;
+    
+    const groupSize = Math.floor(productImages.length / 4);
+    if (groupSize <= 1) return;
+    
+    const interval = setInterval(() => {
+      setStep(s => {
+        const nextStep = s + 1;
+        const slotToUpdate = nextStep % 4;
+        setSlotIndices(prev => {
+          const next = [...prev];
+          next[slotToUpdate] = (next[slotToUpdate] + 1) % groupSize;
+          return next;
+        });
+        return nextStep;
+      });
+    }, 2000);
+    
+    return () => clearInterval(interval);
+  }, [productImages]);
+
   return (
     <>
       <SEO
@@ -149,22 +214,27 @@ export default function AboutPage() {
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                '/resin_art_1.png',
-                '/resin_art_2.png',
-                '/resin_art_3.png',
-                '/resin_art_4.png',
-              ].map((src, i) => (
-                <div key={i} className={`rounded-2xl overflow-hidden ${i === 0 ? 'row-span-2' : ''}`}>
-                  <img
-                    src={src}
-                    alt={`معرض صور سيريوس ${i + 1}`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              ))}
+            <div className="grid grid-cols-2 gap-3 aspect-square w-full">
+              {Array.from({ length: 4 }).map((_, i) => {
+                const groupSize = Math.floor(productImages.length / 4);
+                const groupImages = productImages.slice(i * groupSize, (i + 1) * groupSize);
+                
+                return (
+                  <div key={i} className={`relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-darkbg-lighter ${i === 0 ? 'row-span-2 h-full' : 'h-full'}`}>
+                    {groupImages.map((src, imgIdx) => (
+                      <img
+                        key={src}
+                        src={src}
+                        alt={`معرض صور سيريوس ${i + 1}`}
+                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
+                          imgIdx === slotIndices[i] ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                        }`}
+                        loading="lazy"
+                      />
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>

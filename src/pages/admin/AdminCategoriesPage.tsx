@@ -69,13 +69,14 @@ export default function AdminCategoriesPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const slug = form.name_en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const slugSource = form.name_en.trim() || form.name_ar.trim();
+    const slug = slugSource.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/(^-|-$)/g, '');
     const catData = {
-      name_ar: form.name_ar,
-      name_en: form.name_en,
+      name_ar: form.name_ar.trim(),
+      name_en: form.name_en.trim() || '',
       slug: editingId ? undefined : slug,
-      description_ar: form.description_ar,
-      description_en: form.description_en,
+      description_ar: form.description_ar.trim(),
+      description_en: form.description_en.trim() || '',
       image_url: form.image_url,
       sort_order: Number(form.sort_order),
       is_active: form.is_active,
@@ -166,8 +167,8 @@ export default function AdminCategoriesPage() {
                     className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الاسم بالإنجليزية *</label>
-                  <input value={form.name_en} onChange={e => setForm(f => ({ ...f, name_en: e.target.value }))} required
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الاسم بالإنجليزية</label>
+                  <input value={form.name_en} onChange={e => setForm(f => ({ ...f, name_en: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" />
                 </div>
               </div>
