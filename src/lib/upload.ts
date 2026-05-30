@@ -1,11 +1,13 @@
+import { supabaseUrl, supabaseAnonKey } from './supabase';
+
 export async function uploadImage(file: File): Promise<string | null> {
   try {
     const formData = new FormData();
     formData.append('file', file);
     
-    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload`, {
+    const res = await fetch(`${supabaseUrl}/functions/v1/upload`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
+      headers: { Authorization: `Bearer ${supabaseAnonKey}` },
       body: formData,
     });
     
