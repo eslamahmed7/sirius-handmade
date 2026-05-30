@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import Logo from '../ui/Logo';
 
 export default function Footer() {
   return (
@@ -8,12 +9,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-              <Link to="/" className="flex flex-col items-center gap-1 mb-4">
-                <img src="/logo.png" alt="Sirius Handmade" className="h-12 w-12 rounded-full object-cover border border-primary-500/30" onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }} />
-                <span className="font-bold text-xl text-gray-900 dark:text-white hidden font-serif tracking-widest mt-1">Sirius<span className="text-primary-400 text-sm align-top">✨</span></span>
+              <Link to="/" className="flex flex-col items-center gap-1 mb-4" aria-label="الرئيسية">
+                <Logo size="sm" />
               </Link>
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">منتجات ريزين يدوية الصنع فاخرة، مصنوعة بحب وإبداع لكل منزلك</p>
           </div>
