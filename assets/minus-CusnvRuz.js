@@ -1,0 +1,1 @@
+import{t as e}from"./createLucideIcon-CqS-bfur.js";var t=e(`ChevronRight`,[[`path`,{d:`m9 18 6-6-6-6`,key:`mthhwq`}]]),n=e(`Minus`,[[`path`,{d:`M5 12h14`,key:`1ays0h`}]]);export{t as n,n as t};
