@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import type { Product, Category, ProductImage } from '../../types';
 import { Plus, Pencil, Trash2, Search, X, Upload, Image } from 'lucide-react';
@@ -26,6 +27,8 @@ const emptyForm: ProductForm = {
 };
 
 export default function AdminProductsPage() {
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,11 +104,13 @@ export default function AdminProductsPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const slugSource = form.name_en.trim() || form.name_ar.trim();
+    const toTitleCase = (str: string) => str.split(/\s+/).map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : '').join(' ');
+    const nameEnFormatted = form.name_en.trim() ? toTitleCase(form.name_en.trim()) : '';
+    const slugSource = nameEnFormatted || form.name_ar.trim();
     const slug = slugSource.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/(^-|-$)/g, '');
     const productData = {
       name_ar: form.name_ar.trim(),
-      name_en: form.name_en.trim() || '',
+      name_en: nameEnFormatted,
       slug: editingId ? undefined : slug,
       description_ar: form.description_ar.trim(),
       description_en: form.description_en.trim() || '',
@@ -173,7 +178,7 @@ export default function AdminProductsPage() {
       <div className="relative mb-6">
         <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="بحث عن منتج..."
-          className="w-full pr-10 pl-4 py-2.5 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-white dark:bg-darkbg-card text-gray-900 dark:text-white outline-none focus:border-primary-500 transition-colors text-sm" dir="rtl" />
+          className="w-full pr-10 pl-4 py-2.5 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-white dark:bg-darkbg-card text-gray-900 dark:text-white outline-none focus:border-primary-500 transition-colors text-sm" />
       </div>
 
       {/* Table */}
@@ -201,8 +206,8 @@ export default function AdminProductsPage() {
                           {p.images?.[0]?.image_url ? <img src={p.images[0].image_url} alt="" className="w-full h-full object-cover" /> : <Image size={16} className="m-auto mt-2 text-gray-500 dark:text-gray-400" />}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 dark:text-white line-clamp-1">{p.name_ar}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{p.name_en}</p>
+                          <p className="font-medium text-gray-900 dark:text-white line-clamp-1">{isAr ? p.name_ar : (p.name_en || p.name_ar)}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{isAr ? p.name_en : p.name_ar}</p>
                         </div>
                       </div>
                     </td>
@@ -247,7 +252,7 @@ export default function AdminProductsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الاسم بالعربية *</label>
-                  <input value={form.name_ar} onChange={e => setForm(f => ({ ...f, name_ar: e.target.value }))} required dir="rtl"
+                  <input value={form.name_ar} onChange={e => setForm(f => ({ ...f, name_ar: e.target.value }))} required
                     className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" />
                 </div>
                 <div>
@@ -258,7 +263,7 @@ export default function AdminProductsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الوصف بالعربية</label>
-                <textarea value={form.description_ar} onChange={e => setForm(f => ({ ...f, description_ar: e.target.value }))} rows={3} dir="rtl"
+                <textarea value={form.description_ar} onChange={e => setForm(f => ({ ...f, description_ar: e.target.value }))} rows={3}
                   className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm resize-none" />
               </div>
               <div>
@@ -289,7 +294,7 @@ export default function AdminProductsPage() {
                   <select value={form.category_id} onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm">
                     <option value="">بدون فئة</option>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name_ar}</option>)}
+                    {categories.map(c => <option key={c.id} value={c.id}>{isAr ? c.name_ar : (c.name_en || c.name_ar)}</option>)}
                   </select>
                 </div>
                 <div>

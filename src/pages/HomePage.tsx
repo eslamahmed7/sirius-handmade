@@ -26,6 +26,7 @@ import {
 import ProductCard from '../components/ui/ProductCard';
 import SEO, { generateStructuredData } from '../components/ui/SEO';
 import { useIntersectionObserver } from '../lib/hooks';
+import { useTranslation } from 'react-i18next';
 
 const getCategoryIcon = (slug: string) => {
   const s = slug.toLowerCase();
@@ -54,55 +55,35 @@ function AnimatedSection({ children, className = '' }: { children: React.ReactNo
   );
 }
 
-const VALUES = [
-  {
-    icon: Truck,
-    title: 'شحن سريع',
-    desc: 'نوصل طلبك لأي مكان في مصر',
-  },
-  {
-    icon: Heart,
-    title: 'منتجات مصنوعة بحب',
-    desc: 'كل قطعة مصنوعة يدوياً',
-  },
-  {
-    icon: Gift,
-    title: 'تغليف هدايا فاخر',
-    desc: 'تغليف أنيق لكل الطلبات',
-  },
-  {
-    icon: Award,
-    title: 'ضمان الجودة',
-    desc: 'منتجات عالية الجودة',
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    name: 'سارة الأحمدي',
-    rating: 5,
-    text: 'منتجات رائعة وجودة استثنائية. المنتج وصل مغلفاً بشكل جميل وفاق توقعاتي تماماً.',
-    role: 'عميلة مميزة',
-  },
-  {
-    name: 'محمد العتيبي',
-    rating: 5,
-    text: 'اشتريت هدية لزوجتي وكانت سعيدة جداً. سأتعامل معكم دائماً وأنصح الجميع.',
-    role: 'عميل دائم',
-  },
-  {
-    name: 'نورة الزهراني',
-    rating: 5,
-    text: 'فنانة موهوبة حقاً. كل قطعة فريدة من نوعها ومليئة بالتفاصيل الدقيقة المذهلة.',
-    role: 'عميلة جديدة',
-  },
-];
-
 export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [waMenuOpen, setWaMenuOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+
+  const VALUES = [
+    {
+      icon: Truck,
+      title: t('home.values.shipping_title'),
+      desc: t('home.values.shipping_desc'),
+    },
+    {
+      icon: Heart,
+      title: t('home.values.love_title'),
+      desc: t('home.values.love_desc'),
+    },
+    {
+      icon: Gift,
+      title: t('home.values.gift_title'),
+      desc: t('home.values.gift_desc'),
+    },
+    {
+      icon: Award,
+      title: t('home.values.quality_title'),
+      desc: t('home.values.quality_desc'),
+    },
+  ];
 
   useEffect(() => {
     async function load() {
@@ -133,9 +114,9 @@ export default function HomePage() {
   return (
     <>
       <SEO
-        title="Sirius Handmade - سيريوس هاند ميد"
-        description="لمسات من الريزين صنعت بحب. اكتشف أجمل منتجات الريزين اليدوية الفاخرة من مجوهرات وديكورات منزلية وهدايا مميزة."
-        keywords="ريزين يدوي, مجوهرات ريزين, ديكور ريزين, هدايا مميزة, منتجات يدوية, سيريوس هاند ميد, resin art"
+        title={t('home.seo_title')}
+        description={t('home.seo_desc')}
+        keywords={t('home.seo_keywords')}
         url="/"
       />
 
@@ -149,7 +130,7 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgStructuredData) }}
       />
 
-      <div dir="rtl" className="min-h-screen bg-gray-50 dark:bg-darkbg">
+      <div className="min-h-screen bg-gray-50 dark:bg-darkbg">
         {/* ===== HERO ===== */}
         <section className="relative overflow-hidden min-h-[500px] md:min-h-[600px] flex items-center justify-center">
           {/* Background decorations */}
@@ -175,26 +156,28 @@ export default function HomePage() {
             
             <div className="relative mb-6">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-2">
-                لمسات من الريزين
+                {t('home.hero_title')}
               </h1>
-              <div className="flex items-center justify-center gap-4">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-primary-400 leading-tight">
-                  صنعت بحب
-                </h1>
-                <Heart size={40} className="text-primary-500 stroke-[1.5] hidden md:block" />
-              </div>
+              {t('home.hero_subtitle') && (
+                <div className="relative flex items-center justify-center">
+                  <Heart size={40} className="text-primary-500 stroke-[1.5] absolute hidden md:block rtl:left-full rtl:ml-4 ltr:right-full ltr:mr-4" />
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-primary-400 leading-tight">
+                    {t('home.hero_subtitle')}
+                  </h1>
+                </div>
+              )}
             </div>
 
             <p className="text-lg text-gray-500 dark:text-gray-400 mb-10 leading-relaxed max-w-2xl mx-auto">
-              كل قطعة في Sirius Handmade مصنوعة يدوياً من الريزين بأدق التفاصيل لتكون فريدة مثلك
+              {t('home.hero_desc')}
             </p>
 
             <Link
               to="/products"
               className="inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-primary-500/90 hover:bg-primary-500 text-white font-bold rounded-full transition-all shadow-[0_0_20px_rgba(236,72,153,0.3)] hover:shadow-[0_0_30px_rgba(236,72,153,0.5)] hover:scale-105"
             >
-              تسوق الآن
-              <ArrowLeft size={18} />
+              {t('home.shop_now')}
+              {i18n.language === 'ar' ? <ArrowLeft size={18} /> : <ArrowLeft size={18} className="rotate-180" />}
             </Link>
             
             {/* Optional dots indicator */}
@@ -210,20 +193,38 @@ export default function HomePage() {
         {!loading && categories.length > 0 && (
           <AnimatedSection>
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-b border-gray-200 dark:border-darkbg-lighter/50">
-              <div className="flex flex-wrap justify-center gap-6 md:gap-12">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                 {categories.map(cat => {
                   const Icon = getCategoryIcon(cat.slug || cat.name_ar);
+                  // For dynamic categories, fetch localized name from DB
+                  const categoryName = i18n.language === 'ar' ? cat.name_ar : cat.name_en;
                   return (
                   <Link
                     key={cat.id}
                     to={`/products?category=${cat.slug}`}
-                    className="group flex flex-col items-center justify-center w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-white dark:bg-darkbg-card border border-gray-200 dark:border-darkbg-lighter hover:border-primary-300 dark:hover:border-primary-700 shadow-sm hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden"
+                    className="group flex flex-col transition-all duration-500 hover:-translate-y-1.5"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <Icon size={40} className="text-primary-400 group-hover:text-primary-500 transition-all duration-500 mb-3 group-hover:scale-110 group-hover:-translate-y-1" strokeWidth={1.5} />
-                    <span className="text-sm sm:text-base font-bold text-gray-600 dark:text-gray-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors text-center px-2 z-10">
-                      {cat.name_ar}
-                    </span>
+                    {/* Image Container */}
+                    <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-white dark:bg-darkbg-card border border-gray-200 dark:border-darkbg-lighter shadow-sm group-hover:shadow-md transition-all duration-500">
+                      {cat.image_url ? (
+                        <img
+                          src={cat.image_url}
+                          alt={categoryName}
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-primary-50/50 dark:bg-primary-950/20">
+                          <Icon size={40} className="text-primary-400 group-hover:text-primary-500 transition-all duration-500 group-hover:scale-110" strokeWidth={1.5} />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Content (Text under the image) */}
+                    <div className="mt-3 text-center">
+                      <span className="block text-base sm:text-lg font-bold text-gray-700 dark:text-gray-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate px-2">
+                        {categoryName}
+                      </span>
+                    </div>
                   </Link>
                 )})}
               </div>
@@ -238,15 +239,19 @@ export default function HomePage() {
               <div className="flex items-center gap-3">
                 <Heart size={24} className="text-primary-500 stroke-[1.5]" />
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-                  منتجات مميزة
+                  {t('home.featured_products')}
                 </h2>
               </div>
               <Link
                 to="/products"
                 className="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white font-medium text-sm transition-colors group"
               >
-                عرض الكل
-                <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                {t('home.view_all')}
+                {i18n.language === 'ar' ? (
+                  <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                ) : (
+                  <ChevronLeft size={16} className="rotate-180 group-hover:translate-x-1 transition-transform" />
+                )}
               </Link>
             </div>
 
@@ -265,13 +270,13 @@ export default function HomePage() {
             ) : featured.length === 0 ? (
               <div className="text-center py-20">
                 <ShoppingBag size={48} className="mx-auto text-darkbg-lighter mb-4" />
-                <p className="text-gray-500 text-lg">لا توجد منتجات مميزة حالياً</p>
+                <p className="text-gray-500 text-lg">{t('home.no_featured')}</p>
                 <Link
                   to="/products"
                   className="inline-flex items-center gap-2 mt-6 px-6 py-2.5 bg-primary-600 text-white rounded-full font-semibold hover:bg-primary-500 transition-colors"
                 >
-                  تصفح جميع المنتجات
-                  <ArrowLeft size={16} />
+                  {t('home.browse_all')}
+                  {i18n.language === 'ar' ? <ArrowLeft size={16} /> : <ArrowLeft size={16} className="rotate-180" />}
                 </Link>
               </div>
             ) : (
@@ -305,41 +310,41 @@ export default function HomePage() {
         </AnimatedSection>
         
         {/* Floating WhatsApp Button */}
-        <div className="fixed bottom-6 left-6 z-50 flex flex-col items-end">
+        <div className="fixed bottom-6 rtl:left-6 ltr:right-6 z-50 flex flex-col rtl:items-end ltr:items-end">
           {waMenuOpen && (
             <div className="mb-4 bg-white dark:bg-darkbg-card rounded-2xl shadow-2xl border border-gray-200 dark:border-darkbg-lighter p-2 w-64 overflow-hidden animate-in fade-in slide-in-from-bottom-4">
               <div className="text-sm font-bold text-gray-900 dark:text-white px-3 py-2 border-b border-gray-100 dark:border-darkbg-lighter mb-1">
-                كيف يمكننا مساعدتك؟
+                {t('home.whatsapp.help')}
               </div>
               <a 
                 href="https://wa.me/201005770190?text=مرحباً، أود الاستفسار عن سعر منتج"
                 target="_blank" rel="noopener noreferrer"
                 onClick={() => setWaMenuOpen(false)}
-                className="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 rounded-xl transition-colors text-right"
+                className="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 rounded-xl transition-colors text-start"
               >
-                استفسار عن سعر منتج
+                {t('home.whatsapp.price')}
               </a>
               <a 
                 href="https://wa.me/201005770190?text=مرحباً، أود الاستفسار عن تكلفة الشحن"
                 target="_blank" rel="noopener noreferrer"
                 onClick={() => setWaMenuOpen(false)}
-                className="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 rounded-xl transition-colors text-right"
+                className="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 rounded-xl transition-colors text-start"
               >
-                استفسار عن تكلفة الشحن
+                {t('home.whatsapp.shipping')}
               </a>
               <a 
                 href="https://wa.me/201005770190?text=مرحباً، لدي استفسار عام عن منتج"
                 target="_blank" rel="noopener noreferrer"
                 onClick={() => setWaMenuOpen(false)}
-                className="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 rounded-xl transition-colors text-right"
+                className="block px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 rounded-xl transition-colors text-start"
               >
-                استفسار عام عن منتج
+                {t('home.whatsapp.general')}
               </a>
             </div>
           )}
           <button 
             onClick={() => setWaMenuOpen(!waMenuOpen)}
-            className="w-14 h-14 bg-primary-500 text-white rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(236,72,153,0.5)] hover:scale-110 transition-transform self-end"
+            className="w-14 h-14 bg-primary-500 text-white rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(236,72,153,0.5)] hover:scale-110 transition-transform"
             aria-label="تواصل عبر واتساب"
           >
             {waMenuOpen ? (

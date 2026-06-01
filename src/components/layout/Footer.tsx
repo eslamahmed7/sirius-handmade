@@ -1,44 +1,52 @@
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 import Logo from '../ui/Logo';
+import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-gray-50 dark:bg-darkbg text-gray-600 dark:text-gray-300 border-t border-gray-200 dark:border-darkbg-lighter">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-              <Link to="/" className="flex flex-col items-center gap-1 mb-4" aria-label="الرئيسية">
+              <Link to="/" className="flex flex-col items-center gap-1 mb-4" aria-label={t('header.home')}>
                 <Logo size="sm" />
               </Link>
-            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">منتجات ريزين يدوية الصنع فاخرة، مصنوعة بحب وإبداع لكل منزلك</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed text-center md:text-start">{t('footer.desc')}</p>
           </div>
 
           {/* Links */}
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">روابط سريعة</h3>
+          <div className="text-center md:text-start">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">{t('footer.quick_links')}</h3>
             <ul className="space-y-2">
-              <li><Link to="/" className="text-sm hover:text-primary-400 transition-colors">الرئيسية</Link></li>
-              <li><Link to="/products" className="text-sm hover:text-primary-400 transition-colors">المنتجات</Link></li>
-              <li><Link to="/about" className="text-sm hover:text-primary-400 transition-colors">من نحن</Link></li>
-              <li><Link to="/contact" className="text-sm hover:text-primary-400 transition-colors">تواصل معنا</Link></li>
+              <li><Link to="/" className="text-sm hover:text-primary-400 transition-colors">{t('header.home')}</Link></li>
+              <li><Link to="/products" className="text-sm hover:text-primary-400 transition-colors">{t('header.products')}</Link></li>
+              <li><Link to="/about" className="text-sm hover:text-primary-400 transition-colors">{t('header.about')}</Link></li>
+              <li><Link to="/contact" className="text-sm hover:text-primary-400 transition-colors">{t('header.contact')}</Link></li>
             </ul>
           </div>
 
           {/* Contact */}
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">تواصل معنا</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-sm"><Phone size={14} /> <span>01005770190</span></li>
+          <div className="text-center md:text-start">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">{t('footer.contact')}</h3>
+            <ul className="space-y-3 flex flex-col items-center md:items-start">
+              <li className="flex items-center gap-2 text-sm">
+                <Instagram size={14} />
+                <a href="https://ig.me/m/sirius_handmade7" target="_blank" rel="noopener noreferrer" className="hover:text-primary-400 transition-colors">
+                  sirius_handmade7
+                </a>
+              </li>
               <li className="flex items-center gap-2 text-sm"><Mail size={14} /> <span>siriushandmade59@gmail.com</span></li>
-              <li className="flex items-center gap-2 text-sm"><MapPin size={14} /> <span>مصر - الدقهلية - المنصورة</span></li>
+              <li className="flex items-center gap-2 text-sm"><MapPin size={14} /> <span>{t('footer.address')}</span></li>
             </ul>
           </div>
 
           {/* Social */}
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">تابعنا</h3>
+          <div className="text-center md:text-start flex flex-col items-center md:items-start">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">{t('footer.follow_us')}</h3>
             <div className="flex gap-3">
               <a href="https://www.instagram.com/sirius_handmade7?igsh=ZmltczVzcDIxNzVo&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white dark:bg-darkbg-card hover:bg-primary-600 rounded-lg flex items-center justify-center transition-colors"><Instagram size={18} /></a>
               <a href="https://www.facebook.com/share/1GUQ53F6UM/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white dark:bg-darkbg-card hover:bg-primary-600 rounded-lg flex items-center justify-center transition-colors"><Facebook size={18} /></a>
@@ -52,7 +60,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-gray-200 dark:border-darkbg-lighter text-center text-sm text-gray-500">
-          &copy; {new Date().getFullYear()} Sirius Handmade. جميع الحقوق محفوظة.
+          &copy; {new Date().getFullYear()} Sirius Handmade. {t('footer.rights')}
         </div>
       </div>
     </footer>

@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { lazy, Suspense, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
 import { RealtimeOrdersProvider } from './contexts/RealtimeOrdersContext';
+import { GlobalDiscountProvider } from './contexts/GlobalDiscountContext';
 import { ToastProvider, useToast } from './components/ui/Toast';
 import { PageLoader } from './components/ui/LoadingSpinner';
 
@@ -82,14 +84,22 @@ function AuthCallbackHandler() {
 }
 
 export default function App() {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
+
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ThemeProvider>
         <AuthProvider>
-          <CartProvider>
-            <FavoritesProvider>
-              <NotificationsProvider>
-                <RealtimeOrdersProvider>
+          <GlobalDiscountProvider>
+            <CartProvider>
+              <FavoritesProvider>
+                <NotificationsProvider>
+                  <RealtimeOrdersProvider>
                   <ToastProvider>
                 <PWARegistrar />
                 <AuthCallbackHandler />
@@ -125,10 +135,11 @@ export default function App() {
                   </Routes>
                 </Suspense>
                   </ToastProvider>
-                </RealtimeOrdersProvider>
-              </NotificationsProvider>
-            </FavoritesProvider>
-          </CartProvider>
+                  </RealtimeOrdersProvider>
+                </NotificationsProvider>
+              </FavoritesProvider>
+            </CartProvider>
+          </GlobalDiscountProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

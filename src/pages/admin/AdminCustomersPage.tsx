@@ -56,7 +56,7 @@ export default function AdminCustomersPage() {
       <div className="relative mb-6">
         <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="بحث بالاسم أو البريد أو الهاتف..."
-          className="w-full pr-10 pl-4 py-2.5 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-white dark:bg-darkbg-card text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" dir="rtl" />
+          className="w-full pr-10 pl-4 py-2.5 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-white dark:bg-darkbg-card text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" />
       </div>
 
       {loading ? (

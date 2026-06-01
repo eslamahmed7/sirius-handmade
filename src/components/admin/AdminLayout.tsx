@@ -13,7 +13,7 @@ export default function AdminLayout() {
   if (!isAdmin) return <Navigate to="/login" replace />;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-darkbg flex flex-col md:flex-row" dir="rtl">
+    <div className="min-h-screen bg-gray-50 dark:bg-darkbg flex flex-col md:flex-row">
       {/* Mobile Top Bar */}
       <div className="md:hidden bg-white dark:bg-darkbg-card border-b border-gray-200 dark:border-darkbg-lighter p-4 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-3">

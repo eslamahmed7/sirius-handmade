@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Product, CartItem } from '../types';
+import { useGlobalDiscount } from './GlobalDiscountContext';
 
 interface CartContextType {
   items: CartItem[];
@@ -31,6 +32,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   });
   const [discountCode, setDiscountCode] = useState(() => localStorage.getItem(DISCOUNT_KEY) || '');
   const [discountAmount, setDiscountAmount] = useState(0);
+
+  const { applyGlobalDiscount } = useGlobalDiscount();
+
+  const processedItems = items.map(item => ({
+    ...item,
+    product: applyGlobalDiscount(item.product)
+  }));
 
   useEffect(() => {
     try {
@@ -94,7 +102,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setDiscountAmount(0);
   };
 
-  const subtotal = items.reduce((sum, i) => {
+  const subtotal = processedItems.reduce((sum, i) => {
     const price = i.product.discount_price ?? i.product.price;
     return sum + price * i.quantity;
   }, 0);
@@ -114,14 +122,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     // Calculate eligible subtotal based on scope
     let eligibleSubtotal = 0;
     if (data.scope === 'products' && data.product_ids?.length > 0) {
-      eligibleSubtotal = items.reduce((sum, i) => {
+      eligibleSubtotal = processedItems.reduce((sum, i) => {
         if (data.product_ids.includes(i.product.id)) {
           return sum + (i.product.discount_price ?? i.product.price) * i.quantity;
         }
         return sum;
       }, 0);
     } else if (data.scope === 'categories' && data.category_ids?.length > 0) {
-      eligibleSubtotal = items.reduce((sum, i) => {
+      eligibleSubtotal = processedItems.reduce((sum, i) => {
         if (i.product.category_id && data.category_ids.includes(i.product.category_id)) {
           return sum + (i.product.discount_price ?? i.product.price) * i.quantity;
         }
@@ -145,12 +153,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setDiscountAmount(0);
   };
 
-  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
+  const totalItems = processedItems.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = subtotal - discountAmount;
 
   return (
     <CartContext.Provider value={{
-      items, addItem, removeItem, updateQuantity, clearCart,
+      items: processedItems, addItem, removeItem, updateQuantity, clearCart,
       totalItems, totalPrice, discountCode, discountAmount,
       applyDiscount, removeDiscount,
     }}>

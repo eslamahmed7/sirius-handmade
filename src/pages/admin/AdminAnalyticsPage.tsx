@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import type { AnalyticsData } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
@@ -21,6 +22,8 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function AdminAnalyticsPage() {
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const { user } = useAuth();
   const { showToast } = useToast();
   const [data, setData] = useState<AnalyticsData | null>(null);
@@ -406,7 +409,9 @@ export default function AdminAnalyticsPage() {
                       {i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{p.name_ar}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {isAr ? p.name_ar : (p.name_en || p.name_ar)}
+                      </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{p.quantity} قطعة</p>
                     </div>
                     <span className="text-sm font-semibold text-primary-600 dark:text-primary-400">{p.revenue.toFixed(0)} ج.م</span>
@@ -429,7 +434,9 @@ export default function AdminAnalyticsPage() {
                       {i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{p.name_ar}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {isAr ? p.name_ar : (p.name_en || p.name_ar)}
+                      </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{p.quantity} قطعة</p>
                     </div>
                     <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">{p.revenue.toFixed(0)} ج.م</span>
@@ -492,7 +499,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* ─── Printable Tabular Report (Visible only on Print) ─── */}
-      <div className="hidden print:block text-black bg-white" dir="rtl">
+      <div className="hidden print:block text-black bg-white">
         <h1 className="text-3xl font-bold mb-2">سيريوس هاند ميد - تقرير التحليلات</h1>
         <p className="text-gray-600 mb-8 border-b border-gray-300 pb-4">
           الفترة: {period === 'daily' ? 'يومي' : period === 'weekly' ? 'أسبوعي' : period === 'monthly' ? 'شهري' : 'سنوي'} | تاريخ الإصدار: {new Date().toLocaleDateString('ar-EG')}
@@ -533,7 +540,9 @@ export default function AdminAnalyticsPage() {
               <tbody>
                 {data.topProducts.map((p, i) => (
                   <tr key={p.id} className={i % 2 === 1 ? 'bg-gray-50' : ''}>
-                    <td className="p-3 border border-gray-300">{p.name_ar}</td>
+                    <td className="p-3 border border-gray-300">
+                      {isAr ? p.name_ar : (p.name_en || p.name_ar)}
+                    </td>
                     <td className="p-3 border border-gray-300">{p.quantity}</td>
                     <td className="p-3 border border-gray-300">{p.revenue.toFixed(2)}</td>
                   </tr>

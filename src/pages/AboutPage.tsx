@@ -6,64 +6,57 @@ import {
   RefreshCw, Headphones, ArrowLeft, Star,
 } from 'lucide-react';
 import SEO, { generateStructuredData } from '../components/ui/SEO';
-
-// ─── Data ───────────────────────────────────────────────────────────────────────
-
-const VALUES = [
-  {
-    icon: Heart,
-    title: 'صنع بحب',
-    desc: 'كل قطعة تُصنع بيدين محبتين، وتنبض بالإبداع والعناية في كل تفصيل صغير.',
-  },
-  {
-    icon: Award,
-    title: 'جودة لا تُساوم',
-    desc: 'نستخدم أفضل خامات الريزين والأصباغ المقاومة للأشعة فوق البنفسجية لمنتجات تدوم.',
-  },
-  {
-    icon: Shield,
-    title: 'فريد من نوعه',
-    desc: 'لا يوجد منتجان متطابقان تماماً — طبيعة الريزين تجعل كل قطعة فريدة بصمة خاصة.',
-  },
-  {
-    icon: Users,
-    title: 'عميلنا أولاً',
-    desc: 'سعادتك هي معيار نجاحنا. نلتزم بتجربة تسوق مريحة وخدمة ما بعد البيع الممتازة.',
-  },
-];
-
-const MILESTONES = [
-  { year: '2020', label: 'تأسيس العلامة', desc: 'بدأت الفكرة بورشة صغيرة وشغف كبير بفن الريزين' },
-  { year: '2021', label: 'أول 100 عميل', desc: 'شكّل العملاء الأوائل أساس مجتمعنا الجميل' },
-  { year: '2022', label: 'توسع المنتجات', desc: 'أضفنا مجموعات الديكور المنزلي والمجوهرات الريزين' },
-  { year: '2023', label: '+1000 طلب', desc: 'تجاوزنا الألف طلب وفرحة العملاء تشجّعنا دوماً' },
-  { year: '2024', label: 'المتجر الإلكتروني', desc: 'أطلقنا متجرنا الرقمي لنصل إليك أينما كنت' },
-];
-
-const TESTIMONIALS = [
-  {
-    name: ' محمد احمد ',
-    role: 'عميل مميز',
-    text: 'اشتريت طقم مكتب ريزين هدية لاخويا وكان مبسوط جداً بي. التغليف رائع والجودة فوق الممتاز.',
-    stars: 5,
-  },
-  {
-    name: ' مرام جمال',
-    role: 'عميلة دائمة',
-    text: 'كل قطعة فريدة وجميلة بطريقتها. أشعر أن هناك فنانة موهوبة خلف كل منتج.',
-    stars: 5,
-  },
-  {
-    name: 'منى السيد',
-    role: 'أول طلب',
-    text: 'تجربتي الأولى مع سيريوس كانت رائعة من أول لحظة حتى استلام الطلب. .',
-    stars: 5,
-  },
-];
+import { useTranslation, Trans } from 'react-i18next';
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export default function AboutPage() {
+  const { t, i18n } = useTranslation();
+
+  const VALUES = [
+    {
+      icon: Heart,
+      title: t('home.values.love_title'),
+      desc: t('home.values.love_desc'),
+    },
+    {
+      icon: Award,
+      title: t('home.values.quality_title'),
+      desc: t('home.values.quality_desc'),
+    },
+    {
+      icon: Shield,
+      title: t('home.values.gift_title'), // Using some keys from home since they overlap
+      desc: t('home.values.gift_desc'),
+    },
+    {
+      icon: Users,
+      title: t('about.values_badge'), // For demonstration we map these values
+      desc: t('home.values.shipping_desc'),
+    },
+  ];
+
+  const TESTIMONIALS = [
+    {
+      name: ' محمد احمد ',
+      role: 'عميل مميز',
+      text: 'اشتريت طقم مكتب ريزين هدية لاخويا وكان مبسوط جداً بي. التغليف رائع والجودة فوق الممتاز.',
+      stars: 5,
+    },
+    {
+      name: ' مرام جمال',
+      role: 'عميلة دائمة',
+      text: 'كل قطعة فريدة وجميلة بطريقتها. أشعر أن هناك فنانة موهوبة خلف كل منتج.',
+      stars: 5,
+    },
+    {
+      name: 'منى السيد',
+      role: 'أول طلب',
+      text: 'تجربتي الأولى مع سيريوس كانت رائعة من أول لحظة حتى استلام الطلب. .',
+      stars: 5,
+    },
+  ];
+
   const orgData = useMemo(() => generateStructuredData('organization', {
     socialLinks: [
       'https://instagram.com/siriushandmade',
@@ -146,13 +139,13 @@ export default function AboutPage() {
   return (
     <>
       <SEO
-        title="من نحن | سيريوس هاند ميد"
-        description="تعرف على قصة سيريوس هاند ميد — علامة يدوية مصرية متخصصة في منتجات الريزين الفنية الفاخرة، من مجوهرات وديكورات وهدايا مميزة."
+        title={t('about.seo_title')}
+        description={t('about.seo_desc')}
         keywords="سيريوس هاند ميد, قصتنا, فن الريزين, منتجات يدوية مصرية, عن الشركة"
         url="/about"
       />
 
-      <div dir="rtl" className="min-h-screen">
+      <div className="min-h-screen">
 
         {/* ── Hero ── */}
         <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 overflow-hidden">
@@ -166,19 +159,21 @@ export default function AboutPage() {
           <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-36 text-center">
             <div className="inline-flex items-center gap-2 bg-primary-500/20 border border-primary-500/30 rounded-full px-4 py-1.5 mb-8">
               <Sparkles size={14} className="text-primary-400" />
-              <span className="text-primary-300 text-sm font-semibold">صنع بحب منذ 2020</span>
+              <span className="text-primary-300 text-sm font-semibold">{t('about.badge')}</span>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
-              نحن <span className="text-primary-400">سيريوس</span>
+              <Trans i18nKey="about.hero_title">
+                نحن <span className="text-primary-400">سيريوس</span>
+              </Trans>
             </h1>
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto mb-10">
-              علامة يدوية مصرية أصيلة، متخصصة في إبداع قطع ريزين فنية فريدة — من المجوهرات إلى الديكور المنزلي، كل قطعة تحمل قصة ولمسة روح.
+              {t('about.hero_desc')}
             </p>
             <div className="flex flex-wrap justify-center gap-8">
               {[
-                { value: '+500', label: 'منتج فريد' },
-                { value: '+2000', label: 'عميل سعيد' },
-                { value: '5', label: 'سنوات إبداع' },
+                { value: '+500', label: t('about.stats.products') },
+                { value: '+2000', label: t('about.stats.clients') },
+                { value: '5', label: t('about.stats.years') },
               ].map(stat => (
                 <div key={stat.label} className="text-center">
                   <p className="text-3xl font-extrabold text-primary-400">{stat.value}</p>
@@ -194,24 +189,15 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-block text-primary-600 dark:text-primary-400 text-sm font-semibold tracking-wider uppercase mb-3">
-                قصتنا
+                {t('about.story_badge')}
               </span>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-5">
-                من شغف إلى علامة فارقة
+                {t('about.story_title')}
               </h2>
               <div className="space-y-4 text-gray-500 dark:text-gray-400 leading-relaxed">
-                <p>
-                  بدأت رحلة سيريوس هاند ميد عام 2020 من ورشة صغيرة بيد مبدعة وقلب مفعم بالحب لفن الريزين.
-                  كانت البداية بضع قطع تُصنع للأصدقاء والعائلة، لكن الإقبال الرائع جعلها تتحول إلى مشروع حقيقي.
-                </p>
-                <p>
-                  تخصصنا في فن الريزين الشفاف والملوّن لصنع مجوهرات، أدوات مكتبية، لوحات فنية، وإكسسوارات ديكور
-                  فريدة تجمع بين الجمال العصري والروح اليدوية الأصيلة.
-                </p>
-                <p>
-                  اليوم نفخر بخدمة آلاف العملاء في مصر وخارجها، ونواصل الإبداع برؤية واحدة:
-                  أن تحمل كل قطعة من قطعنا معنى خاصاً لمن يمتلكها.
-                </p>
+                <p>{t('about.story_p1')}</p>
+                <p>{t('about.story_p2')}</p>
+                <p>{t('about.story_p3')}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3 aspect-square w-full">
@@ -225,7 +211,7 @@ export default function AboutPage() {
                       <img
                         key={src}
                         src={src}
-                        alt={`معرض صور سيريوس ${i + 1}`}
+                        alt={`Gallery ${i + 1}`}
                         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
                           imgIdx === slotIndices[i] ? 'opacity-100 z-10' : 'opacity-0 z-0'
                         }`}
@@ -244,10 +230,10 @@ export default function AboutPage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <span className="inline-block text-primary-600 dark:text-primary-400 text-sm font-semibold tracking-wider uppercase mb-3">
-                قيمنا
+                {t('about.values_badge')}
               </span>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-                ما يُحرّكنا كل يوم
+                {t('about.values_title')}
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -274,10 +260,10 @@ export default function AboutPage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <span className="inline-block text-primary-600 dark:text-primary-400 text-sm font-semibold tracking-wider uppercase mb-3">
-                آراء العملاء
+                {t('about.testimonials_badge')}
               </span>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                يقولون عنّا
+                {t('about.testimonials_title')}
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -286,7 +272,7 @@ export default function AboutPage() {
                   key={name}
                   className="bg-white dark:bg-darkbg-card rounded-2xl p-6 border border-gray-200 dark:border-darkbg-lighter hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="flex gap-1 mb-4">
+                  <div className="flex gap-1 mb-4 flex-row-reverse justify-end">
                     {Array.from({ length: stars }).map((_, i) => (
                       <Star key={i} size={14} className="fill-amber-400 text-amber-400" />
                     ))}
@@ -294,13 +280,13 @@ export default function AboutPage() {
                   <blockquote className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-5">
                     "{text}"
                   </blockquote>
-                  <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-darkbg-lighter">
+                  <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-darkbg-lighter flex-row">
                     <div className="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center flex-shrink-0">
                       <span className="text-primary-700 dark:text-primary-400 font-bold text-sm">
                         {name.charAt(0)}
                       </span>
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="font-bold text-gray-900 dark:text-white text-sm">{name}</p>
                       <p className="text-xs text-gray-500">{role}</p>
                     </div>
@@ -315,17 +301,17 @@ export default function AboutPage() {
         <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center mb-12">
             <span className="inline-block text-primary-600 dark:text-primary-400 text-sm font-semibold tracking-wider uppercase mb-3">
-              لماذا نحن؟
+              {t('about.why_us_badge')}
             </span>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              تجربة تسوق متكاملة
+              {t('about.why_us_title')}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { icon: Shield, title: 'جودة مضمونة', desc: 'فحص دقيق قبل الشحن' },
-              { icon: Truck, title: 'توصيل سريع', desc: '2-5 أيام عمل' },
-              { icon: Headphones, title: 'دعم متواصل', desc: 'على مدار الساعة' },
+              { icon: Shield, title: t('home.values.quality_title'), desc: t('home.values.quality_desc') },
+              { icon: Truck, title: t('home.values.shipping_title'), desc: t('home.values.shipping_desc') },
+              { icon: Headphones, title: t('about.values_title'), desc: t('about.values_badge') },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="text-center p-5 rounded-2xl bg-white dark:bg-darkbg-card border border-gray-200 dark:border-darkbg-lighter hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md transition-all">
                 <div className="w-12 h-12 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center mx-auto mb-3">
@@ -350,24 +336,24 @@ export default function AboutPage() {
           <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
             <Sparkles size={36} className="mx-auto text-primary-200 mb-4" />
             <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
-              هل أنت مستعد للاكتشاف؟
+              {t('about.cta_title')}
             </h2>
             <p className="text-primary-100 text-lg mb-8 max-w-xl mx-auto leading-relaxed">
-              تصفح مجموعتنا من القطع الفنية اليدوية الفريدة وأضف لمسة جمال خاصة لحياتك.
+              {t('about.cta_desc')}
             </p>
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap gap-4 justify-center flex-row-reverse ltr:flex-row">
               <Link
                 to="/products"
                 className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary-500 text-white font-bold rounded-xl hover:bg-primary-50 transition-colors shadow-lg"
               >
-                تسوق الآن
-                <ArrowLeft size={18} />
+                {t('about.shop_now')}
+                {i18n.language === 'ar' ? <ArrowLeft size={18} /> : <ArrowLeft size={18} className="rotate-180" />}
               </Link>
               <Link
                 to="/contact"
                 className="inline-flex items-center gap-2 px-8 py-3.5 bg-gray-100 dark:bg-darkbg-lighter/50 hover:bg-gray-100 dark:bg-darkbg-lighter/70 text-gray-900 dark:text-white font-semibold rounded-xl transition-colors border border-white/30"
               >
-                تواصل معنا
+                {t('about.contact_us')}
               </Link>
             </div>
           </div>

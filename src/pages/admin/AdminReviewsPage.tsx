@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import type { Review } from '../../types';
 import { CheckCircle, XCircle, Trash2, Star, MessageSquare } from 'lucide-react';
@@ -7,6 +8,8 @@ import { useToast } from '../../components/ui/Toast';
 type ReviewWithRelations = Review & { product?: { name_ar?: string; name_en?: string } | null; user?: { full_name?: string } | null };
 
 export default function AdminReviewsPage() {
+  const { i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const [reviews, setReviews] = useState<ReviewWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('pending');
@@ -107,7 +110,9 @@ export default function AdminReviewsPage() {
                           <Star key={s} size={14} className={s <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-500 dark:text-gray-400'} />
                         ))}
                       </div>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">على {product?.name_ar || 'منتج'}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {isAr ? 'على' : 'on'} {isAr ? (product?.name_ar || 'منتج') : (product?.name_en || product?.name_ar || 'product')}
+                      </span>
                     </div>
                     {review.comment && (
                       <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{review.comment}</p>

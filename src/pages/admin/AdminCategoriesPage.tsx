@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import type { Category } from '../../types';
 import { Plus, Pencil, Trash2, X, FolderOpen, Upload } from 'lucide-react';
@@ -21,6 +22,8 @@ const emptyForm: CategoryForm = {
 };
 
 export default function AdminCategoriesPage() {
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -69,11 +72,13 @@ export default function AdminCategoriesPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const slugSource = form.name_en.trim() || form.name_ar.trim();
+    const toTitleCase = (str: string) => str.split(/\s+/).map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : '').join(' ');
+    const nameEnFormatted = form.name_en.trim() ? toTitleCase(form.name_en.trim()) : '';
+    const slugSource = nameEnFormatted || form.name_ar.trim();
     const slug = slugSource.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/(^-|-$)/g, '');
     const catData = {
       name_ar: form.name_ar.trim(),
-      name_en: form.name_en.trim() || '',
+      name_en: nameEnFormatted,
       slug: editingId ? undefined : slug,
       description_ar: form.description_ar.trim(),
       description_en: form.description_en.trim() || '',
@@ -126,15 +131,19 @@ export default function AdminCategoriesPage() {
                     {cat.image_url ? <img src={cat.image_url} alt="" className="w-full h-full object-cover rounded-xl" /> : <FolderOpen size={20} className="text-primary-600 dark:text-primary-400" />}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{cat.name_ar}</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{cat.name_en}</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{isAr ? cat.name_ar : (cat.name_en || cat.name_ar)}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{isAr ? cat.name_en : cat.name_ar}</p>
                   </div>
                 </div>
                 <span className={`px-2 py-0.5 rounded text-xs font-medium ${cat.is_active ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-500 dark:text-gray-400'}`}>
                   {cat.is_active ? 'نشط' : 'معطل'}
                 </span>
               </div>
-              {cat.description_ar && <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">{cat.description_ar}</p>}
+              {(isAr ? cat.description_ar : (cat.description_en || cat.description_ar)) && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">
+                  {isAr ? cat.description_ar : (cat.description_en || cat.description_ar)}
+                </p>
+              )}
               <div className="flex items-center gap-2 pt-3 border-t border-gray-200 dark:border-darkbg-lighter">
                 <button onClick={() => openEdit(cat)} className="flex-1 py-2 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors flex items-center justify-center gap-1">
                   <Pencil size={14} /> تعديل
@@ -163,7 +172,7 @@ export default function AdminCategoriesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الاسم بالعربية *</label>
-                  <input value={form.name_ar} onChange={e => setForm(f => ({ ...f, name_ar: e.target.value }))} required dir="rtl"
+                  <input value={form.name_ar} onChange={e => setForm(f => ({ ...f, name_ar: e.target.value }))} required
                     className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" />
                 </div>
                 <div>
@@ -174,7 +183,7 @@ export default function AdminCategoriesPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الوصف بالعربية</label>
-                <textarea value={form.description_ar} onChange={e => setForm(f => ({ ...f, description_ar: e.target.value }))} rows={2} dir="rtl"
+                <textarea value={form.description_ar} onChange={e => setForm(f => ({ ...f, description_ar: e.target.value }))} rows={2}
                   className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm resize-none" />
               </div>
               <div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase, supabaseUrl } from '../../lib/supabase';
 import type { Order } from '../../types';
 import { ORDER_STATUS_LABELS } from '../../types';
@@ -8,6 +9,8 @@ import { useToast } from '../../components/ui/Toast';
 type OrderWithUser = Order & { user?: { full_name?: string; email?: string } | null };
 
 export default function AdminOrdersPage() {
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const [orders, setOrders] = useState<OrderWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -88,7 +91,7 @@ export default function AdminOrdersPage() {
         <div className="relative flex-1">
           <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="بحث برقم الطلب أو اسم العميل..."
-            className="w-full pr-10 pl-4 py-2.5 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-white dark:bg-darkbg-card text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" dir="rtl" />
+            className="w-full pr-10 pl-4 py-2.5 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-white dark:bg-darkbg-card text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" />
         </div>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
           className="px-4 py-2.5 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-white dark:bg-darkbg-card text-gray-900 dark:text-white outline-none text-sm">
@@ -183,7 +186,9 @@ export default function AdminOrdersPage() {
                         {item.product_image ? <img src={item.product_image} alt="" className="w-full h-full object-cover" /> : null}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">{item.product_name_ar}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {isAr ? item.product_name_ar : (item.product_name_en || item.product_name_ar)}
+                        </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">{item.quantity} x {Number(item.unit_price).toFixed(2)} ج.م</p>
                       </div>
                       <span className="font-medium text-sm">{Number(item.total_price).toFixed(2)} ج.م</span>

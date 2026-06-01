@@ -8,63 +8,13 @@ import { useToast } from '../components/ui/Toast';
 import { sanitizeText, validateEmail } from '../lib/security';
 import { supabase } from '../lib/supabase';
 import SEO from '../components/ui/SEO';
-
-// ─── Contact info constants ────────────────────────────────────────────────────
+import { useTranslation } from 'react-i18next';
 
 const TikTokIcon = ({ size, className }: any) => (
   <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
   </svg>
 );
-
-const CONTACT_INFO = [
-  {
-    icon: Instagram,
-    title: 'انستجرام',
-    value: '@sirius_handmade7',
-    href: 'https://www.instagram.com/sirius_handmade7?igsh=ZmltczVzcDIxNzVo&utm_source=qr',
-    dir: 'ltr' as const,
-  },
-  {
-    icon: Facebook,
-    title: 'فيسبوك',
-    value: 'Sirius Handmade',
-    href: 'https://www.facebook.com/share/1GUQ53F6UM/?mibextid=wwXIfr',
-    dir: 'ltr' as const,
-  },
-  {
-    icon: TikTokIcon,
-    title: 'تيك توك',
-    value: '@sirius_handmade',
-    href: 'https://www.tiktok.com/@sirius_handmade?_r=1&_d=ef6ifg40ghd8ih&sec_uid=MS4wLjABAAAAC1RmtLXhxq2wKTcXjnu4K6deyDBMM7BxGnszUIe5gTGyg4KQj94wqQXbOUhmHth5&share_author_id=7010492566484845573&sharer_language=ar&source=h5_m&u_code=dkkg4ef8h7ek0b&ug_btm=b8727,b0&social_share_type=4&utm_source=copy&sec_user_id=MS4wLjABAAAAC1RmtLXhxq2wKTcXjnu4K6deyDBMM7BxGnszUIe5gTGyg4KQj94wqQXbOUhmHth5&tt_from=copy&utm_medium=ios&utm_campaign=client_share&enable_checksum=1&user_id=7010492566484845573&share_link_id=94042EE8-F6C4-4C65-ADFD-6D85C5FB3B02&share_app_id=1233',
-    dir: 'ltr' as const,
-  },
-  {
-    icon: Mail,
-    title: 'البريد الإلكتروني',
-    value: 'siriushandmade59@gmail.com',
-    href: 'mailto:siriushandmade59@gmail.com',
-    dir: 'ltr' as const,
-  },
-  {
-    icon: MapPin,
-    title: 'الموقع',
-    value: 'مصر - الدقهلية - المنصورة',
-    href: 'https://maps.google.com/?q=مصر،+الدقهلية،+المنصورة',
-    dir: 'rtl' as const,
-  },
-];
-
-const SUBJECTS = [
-  'استفسار عن منتج',
-  'متابعة طلب',
-  'شكوى أو ملاحظة',
-  'طلب تصميم مخصص',
-  'استفسار عن الشحن',
-  'أخرى',
-];
-
-// ─── Form interfaces ────────────────────────────────────────────────────────────
 
 interface ContactForm {
   name: string;
@@ -80,11 +30,59 @@ interface FormErrors {
   message?: string;
 }
 
-// ─── Main Component ────────────────────────────────────────────────────────────
-
 export default function ContactPage() {
   const { user, profile } = useAuth();
   const { showToast } = useToast();
+  const { t, i18n } = useTranslation();
+
+  const CONTACT_INFO = [
+    {
+      icon: Instagram,
+      title: t('contact.info.instagram'),
+      value: '@sirius_handmade7',
+      href: 'https://www.instagram.com/sirius_handmade7?igsh=ZmltczVzcDIxNzVo&utm_source=qr',
+      dir: 'ltr' as const,
+    },
+    {
+      icon: Facebook,
+      title: t('contact.info.facebook'),
+      value: 'Sirius Handmade',
+      href: 'https://www.facebook.com/share/1GUQ53F6UM/?mibextid=wwXIfr',
+      dir: 'ltr' as const,
+    },
+    {
+      icon: TikTokIcon,
+      title: t('contact.info.tiktok'),
+      value: '@sirius_handmade',
+      href: 'https://www.tiktok.com/@sirius_handmade?_r=1&_d=ef6ifg40ghd8ih&sec_uid=MS4wLjABAAAAC1RmtLXhxq2wKTcXjnu4K6deyDBMM7BxGnszUIe5gTGyg4KQj94wqQXbOUhmHth5&share_author_id=7010492566484845573&sharer_language=ar&source=h5_m&u_code=dkkg4ef8h7ek0b&ug_btm=b8727,b0&social_share_type=4&utm_source=copy&sec_user_id=MS4wLjABAAAAC1RmtLXhxq2wKTcXjnu4K6deyDBMM7BxGnszUIe5gTGyg4KQj94wqQXbOUhmHth5&tt_from=copy&utm_medium=ios&utm_campaign=client_share&enable_checksum=1&user_id=7010492566484845573&share_link_id=94042EE8-F6C4-4C65-ADFD-6D85C5FB3B02&share_app_id=1233',
+      dir: 'ltr' as const,
+    },
+    {
+      icon: Mail,
+      title: t('contact.info.email'),
+      value: 'siriushandmade59@gmail.com',
+      href: 'mailto:siriushandmade59@gmail.com',
+      dir: 'ltr' as const,
+    },
+    {
+      icon: MapPin,
+      title: t('contact.info.location'),
+      value: t('contact.info.address_value'),
+      href: i18n.language === 'en'
+        ? 'https://maps.google.com/?q=Egypt,+Dakahlia,+Mansoura'
+        : 'https://maps.google.com/?q=مصر،+الدقهلية،+المنصورة',
+      dir: 'auto' as const,
+    },
+  ];
+
+  const SUBJECTS = [
+    'استفسار عن منتج',
+    'متابعة طلب',
+    'شكوى أو ملاحظة',
+    'طلب تصميم مخصص',
+    'استفسار عن الشحن',
+    'أخرى',
+  ];
 
   const [form, setForm] = useState<ContactForm>({
     name: profile?.full_name ?? '',
@@ -99,16 +97,16 @@ export default function ContactPage() {
   const validate = (): boolean => {
     const errs: FormErrors = {};
     const name = sanitizeText(form.name.trim());
-    if (!name) errs.name = 'الاسم مطلوب';
-    else if (name.length < 2) errs.name = 'الاسم قصير جداً';
+    if (!name) errs.name = t('contact.errors.name_req');
+    else if (name.length < 2) errs.name = t('contact.errors.name_short');
 
-    if (form.phone.trim() && form.phone.trim().length < 8) errs.phone = 'رقم الهاتف غير صالح';
+    if (form.phone.trim() && form.phone.trim().length < 8) errs.phone = t('contact.errors.phone_invalid');
 
-    if (!form.subject) errs.subject = 'يرجى اختيار موضوع الرسالة';
+    if (!form.subject) errs.subject = t('contact.errors.subject_req');
 
     const msg = sanitizeText(form.message.trim());
-    if (!msg) errs.message = 'الرسالة مطلوبة';
-    else if (msg.length < 10) errs.message = 'الرسالة قصيرة جداً (10 أحرف على الأقل)';
+    if (!msg) errs.message = t('contact.errors.msg_req');
+    else if (msg.length < 10) errs.message = t('contact.errors.msg_short');
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -152,12 +150,11 @@ export default function ContactPage() {
 
     try {
       await copyToClipboard(igText);
-      showToast('تم نسخ الرسالة بنجاح! قم بلصقها في المحادثة الآن', 'success');
+      showToast(t('contact.toast_success'), 'success');
     } catch (e) {
-      showToast('لم نتمكن من نسخ الرسالة، يرجى كتابتها يدوياً', 'error');
+      showToast(t('contact.toast_error'), 'error');
     }
     
-    // Open Instagram Direct (or profile as fallback)
     window.open('https://ig.me/m/sirius_handmade7', '_blank');
     
     setSent(true);
@@ -169,31 +166,31 @@ export default function ContactPage() {
   return (
     <>
       <SEO
-        title="تواصل معنا | سيريوس هاند ميد"
-        description="تواصل مع فريق سيريوس هاند ميد لأي استفسار أو طلب مخصص. نحن هنا لمساعدتك."
+        title={t('contact.seo_title')}
+        description={t('contact.seo_desc')}
         keywords="تواصل, استفسار, خدمة عملاء, سيريوس هاند ميد"
         url="/contact"
       />
 
-      <div dir="rtl" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         {/* ── Header ── */}
         <div className="text-center mb-12">
           <span className="inline-block text-primary-600 dark:text-primary-400 text-sm font-semibold tracking-wider uppercase mb-3">
-            نحب نسمعك
+            {t('contact.badge')}
           </span>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
-            تواصل معنا
+            {t('contact.title')}
           </h1>
           <p className="text-gray-500 dark:text-gray-400 max-w-xl mx-auto leading-relaxed">
-            فريقنا جاهز للإجابة عن جميع استفساراتك وتلبية طلباتك. لا تتردد في التواصل معنا!
+            {t('contact.desc')}
           </p>
         </div>
 
         <div className="grid lg:grid-cols-5 gap-8">
 
           {/* ── Contact info ── */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-4 text-start">
             {CONTACT_INFO.map(({ icon: Icon, title, value, href, dir }) => (
               <a
                 key={title}
@@ -213,8 +210,6 @@ export default function ContactPage() {
                 </div>
               </a>
             ))}
-
-
           </div>
 
           {/* ── Contact form ── */}
@@ -227,42 +222,41 @@ export default function ContactPage() {
                     <CheckCircle2 size={32} className="text-primary-600 dark:text-primary-400" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                    تم إرسال رسالتك!
+                    {t('contact.success_title')}
                   </h3>
                   <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
-                    شكراً لتواصلك معنا. سنرد عليك في أقرب وقت ممكن.
+                    {t('contact.success_desc')}
                   </p>
                   <button
                     onClick={() => setSent(false)}
                     className="px-5 py-2.5 border border-primary-300 dark:border-primary-700 text-primary-600 dark:text-primary-400 rounded-xl text-sm font-semibold hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
                   >
-                    إرسال رسالة أخرى
+                    {t('contact.send_another')}
                   </button>
                 </div>
               ) : (
                 <>
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
-                    أرسل رسالة
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 text-start">
+                    {t('contact.form_title')}
                   </h2>
 
-                  <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                  <form onSubmit={handleSubmit} noValidate className="space-y-5 text-start">
 
-                    {/* Name + Email row */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       {/* Name */}
                       <div>
                         <label htmlFor="contact-name" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                          الاسم <span className="text-rose-500">*</span>
+                          {t('contact.labels.name')} <span className="text-rose-500">*</span>
                         </label>
                         <div className="relative">
-                          <User size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
+                          <User size={15} className="absolute rtl:left-3 ltr:right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
                           <input
                             id="contact-name"
                             type="text"
-                            placeholder="اسمك الكامل"
+                            placeholder={t('contact.placeholders.name')}
                             value={form.name}
                             onChange={e => { setForm(p => ({ ...p, name: e.target.value })); setErrors(p => ({ ...p, name: undefined })); }}
-                            className={`w-full pr-9 pl-4 py-2.5 border rounded-xl text-sm bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:ring-2 transition-all placeholder:text-gray-500 dark:text-gray-400 ${
+                            className={`w-full rtl:pl-9 ltr:pr-9 rtl:pr-4 ltr:pl-4 py-2.5 border rounded-xl text-sm bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:ring-2 transition-all placeholder:text-gray-500 dark:text-gray-400 ${
                               errors.name ? 'border-rose-400 focus:ring-rose-300' : 'border-gray-200 dark:border-darkbg-lighter focus:ring-primary-500'
                             }`}
                           />
@@ -273,16 +267,16 @@ export default function ContactPage() {
                       {/* Phone */}
                       <div>
                         <label htmlFor="contact-phone" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                          رقم الهاتف <span className="text-gray-500 text-xs font-normal">(اختياري)</span>
+                          {t('contact.labels.phone')} <span className="text-gray-500 text-xs font-normal">{t('contact.labels.phone_optional')}</span>
                         </label>
                         <div className="relative">
                           <input
                             id="contact-phone"
                             type="tel"
-                            placeholder="رقم هاتفك"
+                            placeholder={t('contact.placeholders.phone')}
                             value={form.phone}
                             onChange={e => { setForm(p => ({ ...p, phone: e.target.value })); setErrors(p => ({ ...p, phone: undefined })); }}
-                            className={`w-full pr-9 pl-4 py-2.5 border rounded-xl text-sm bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:ring-2 transition-all placeholder:text-gray-500 dark:text-gray-400 ${
+                            className={`w-full pr-4 pl-4 py-2.5 border rounded-xl text-sm bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:ring-2 transition-all placeholder:text-gray-500 dark:text-gray-400 ${
                               errors.phone ? 'border-rose-400 focus:ring-rose-300' : 'border-gray-200 dark:border-darkbg-lighter focus:ring-primary-500'
                             }`}
                             dir="ltr"
@@ -295,19 +289,19 @@ export default function ContactPage() {
                     {/* Subject */}
                     <div>
                       <label htmlFor="contact-subject" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                        الموضوع <span className="text-rose-500">*</span>
+                        {t('contact.labels.subject')} <span className="text-rose-500">*</span>
                       </label>
                       <div className="relative">
-                        <FileText size={15} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
+                        <FileText size={15} className="absolute rtl:left-3 ltr:right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
                         <select
                           id="contact-subject"
                           value={form.subject}
                           onChange={e => { setForm(p => ({ ...p, subject: e.target.value })); setErrors(p => ({ ...p, subject: undefined })); }}
-                          className={`w-full pr-9 pl-4 py-2.5 border rounded-xl text-sm bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:ring-2 transition-all appearance-none cursor-pointer ${
+                          className={`w-full rtl:pl-9 ltr:pr-9 rtl:pr-4 ltr:pl-4 py-2.5 border rounded-xl text-sm bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:ring-2 transition-all appearance-none cursor-pointer ${
                             errors.subject ? 'border-rose-400 focus:ring-rose-300' : 'border-gray-200 dark:border-darkbg-lighter focus:ring-primary-500'
                           }`}
                         >
-                          <option value="">اختر موضوع الرسالة</option>
+                          <option value="">{t('contact.placeholders.subject')}</option>
                           {SUBJECTS.map(s => (
                             <option key={s} value={s}>{s}</option>
                           ))}
@@ -319,11 +313,11 @@ export default function ContactPage() {
                     {/* Message */}
                     <div>
                       <label htmlFor="contact-message" className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                        الرسالة <span className="text-rose-500">*</span>
+                        {t('contact.labels.message')} <span className="text-rose-500">*</span>
                       </label>
                       <textarea
                         id="contact-message"
-                        placeholder="اكتب رسالتك هنا..."
+                        placeholder={t('contact.placeholders.message')}
                         value={form.message}
                         onChange={e => { setForm(p => ({ ...p, message: e.target.value })); setErrors(p => ({ ...p, message: undefined })); }}
                         rows={5}
@@ -336,7 +330,7 @@ export default function ContactPage() {
                         {errors.message
                           ? <p className="text-xs text-rose-500">{errors.message}</p>
                           : <span />}
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 flex-row-reverse flex">
                           {form.message.length}/1000
                         </span>
                       </div>
@@ -351,7 +345,7 @@ export default function ContactPage() {
                       {submitting
                         ? <Loader2 size={18} className="animate-spin" />
                         : <Instagram size={18} />}
-                      {submitting ? 'جاري التحويل...' : 'إرسال الرسالة عبر الانستجرام'}
+                      {submitting ? t('contact.submitting') : t('contact.submit')}
                     </button>
                   </form>
                 </>

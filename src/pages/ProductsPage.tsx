@@ -4,6 +4,7 @@ import {
   SlidersHorizontal, X, Search, ChevronDown, ChevronUp,
   Package, Filter, ArrowUpDown, ArrowUp, ArrowDown, Loader2,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import type { Product, Category } from '../types';
 import ProductCard from '../components/ui/ProductCard';
@@ -14,11 +15,11 @@ import { useDebounce } from '../lib/hooks';
 
 type SortOption = 'newest' | 'price_asc' | 'price_desc' | 'rating';
 
-const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: 'newest', label: 'الأحدث' },
-  { value: 'price_asc', label: 'السعر: من الأقل' },
-  { value: 'price_desc', label: 'السعر: من الأعلى' },
-  { value: 'rating', label: 'الأعلى تقييماً' },
+const SORT_OPTIONS: { value: SortOption }[] = [
+  { value: 'newest' },
+  { value: 'price_asc' },
+  { value: 'price_desc' },
+  { value: 'rating' },
 ];
 
 const PAGE_SIZE = 16;
@@ -42,6 +43,8 @@ function SkeletonCard() {
 
 export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
 
   // URL-driven state
   const categoryParam = searchParams.get('category') ?? '';
@@ -200,39 +203,39 @@ export default function ProductsPage() {
 
   const hasFilters = categoryParam || searchParam || minPriceParam || maxPriceParam;
   const hasMore = products.length < total;
-  const currentSortLabel = SORT_OPTIONS.find(o => o.value === sortParam)?.label ?? 'الأحدث';
+  const currentSortLabel = t(`products.sort.${sortParam}`);
 
   // ── Sidebar content ─────────────────────────────────────────────────────────
 
   const SidebarContent = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 text-start">
       {/* Categories */}
       <div>
-        <h3 className="font-bold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wider">
-          الفئات
+        <h3 className="font-bold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wider text-start">
+          {t('products.categories')}
         </h3>
         <div className="space-y-1">
           <button
             onClick={() => updateParam('category', '')}
-            className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-colors ${
+            className={`w-full text-start px-3 py-2 rounded-lg text-sm transition-colors ${
               !categoryParam
                 ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-400 font-semibold'
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
-            جميع المنتجات
+            {t('products.all_products')}
           </button>
           {categories.map(cat => (
             <button
               key={cat.id}
               onClick={() => updateParam('category', cat.slug)}
-              className={`w-full text-right px-3 py-2 rounded-lg text-sm transition-colors ${
+              className={`w-full text-start px-3 py-2 rounded-lg text-sm transition-colors ${
                 categoryParam === cat.slug
                   ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-400 font-semibold'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
-              {cat.name_ar}
+              {isAr ? cat.name_ar : cat.name_en}
             </button>
           ))}
         </div>
@@ -240,13 +243,13 @@ export default function ProductsPage() {
 
       {/* Price Range */}
       <div>
-        <h3 className="font-bold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wider">
-          نطاق السعر
+        <h3 className="font-bold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wider text-start">
+          {t('products.price_range')}
         </h3>
         <div className="space-y-3">
           <div>
-            <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-              الحد الأدنى (ج.م)
+            <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block text-start">
+              {t('products.min_price')}
             </label>
             <input
               type="number"
@@ -256,13 +259,13 @@ export default function ProductsPage() {
               onChange={e => setMinPriceInput(e.target.value)}
               onBlur={() => updateParam('min_price', minPriceInput)}
               onKeyDown={e => e.key === 'Enter' && updateParam('min_price', minPriceInput)}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-lg text-sm bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-lg text-sm bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-primary-500 text-start"
               dir="ltr"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-              الحد الأقصى (ج.م)
+            <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block text-start">
+              {t('products.max_price')}
             </label>
             <input
               type="number"
@@ -272,7 +275,7 @@ export default function ProductsPage() {
               onChange={e => setMaxPriceInput(e.target.value)}
               onBlur={() => updateParam('max_price', maxPriceInput)}
               onKeyDown={e => e.key === 'Enter' && updateParam('max_price', maxPriceInput)}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-lg text-sm bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-lg text-sm bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-primary-500 text-start"
               dir="ltr"
             />
           </div>
@@ -286,9 +289,9 @@ export default function ProductsPage() {
                 params.delete('max_price');
                 setSearchParams(params, { replace: true });
               }}
-              className="text-xs text-rose-500 hover:text-rose-600 transition-colors"
+              className="text-xs text-rose-500 hover:text-rose-600 transition-colors block text-start"
             >
-              مسح نطاق السعر
+              {t('products.clear_price_range')}
             </button>
           )}
         </div>
@@ -300,7 +303,7 @@ export default function ProductsPage() {
           onClick={clearAllFilters}
           className="w-full py-2 border border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 rounded-lg text-sm font-medium hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
         >
-          مسح جميع الفلاتر
+          {t('products.clear_all_filters')}
         </button>
       )}
     </div>
@@ -311,24 +314,26 @@ export default function ProductsPage() {
   return (
     <>
       <SEO
-        title="جميع المنتجات | سيريوس هاند ميد"
-        description="تصفح مجموعتنا الكاملة من منتجات الريزين اليدوية الفاخرة — مجوهرات، ديكور منزلي، هدايا مميزة، وأكثر."
-        keywords="منتجات ريزين, مجوهرات يدوية, ديكور منزلي, هدايا, سيريوس هاند ميد"
+        title={t('products.seo_title')}
+        description={t('products.seo_desc')}
+        keywords={t('products.seo_keywords')}
         url="/products"
       />
 
-      <div dir="rtl" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* ── Header ── */}
-        <div className="mb-6">
+        <div className="mb-6 text-start">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1">
             {categoryParam
-              ? (categories.find(c => c.slug === categoryParam)?.name_ar ?? 'المنتجات')
-              : 'جميع المنتجات'}
+              ? (isAr 
+                  ? (categories.find(c => c.slug === categoryParam)?.name_ar ?? t('products.title'))
+                  : (categories.find(c => c.slug === categoryParam)?.name_en ?? t('products.title')))
+              : t('products.all_products')}
           </h1>
           {!loading && (
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {total} منتج متاح
+              {total === 1 ? t('products.available_count_one') : t('products.available_count_other', { count: total })}
             </p>
           )}
         </div>
@@ -337,18 +342,18 @@ export default function ProductsPage() {
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           {/* Search */}
           <div className="relative flex-1">
-            <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
+            <Search size={16} className="absolute rtl:right-3 ltr:left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
             <input
               type="search"
-              placeholder="ابحث عن منتج..."
+              placeholder={t('products.search_placeholder')}
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
-              className="w-full pr-9 pl-4 py-2.5 border border-gray-200 dark:border-darkbg-lighter rounded-xl text-sm bg-white dark:bg-darkbg-card text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+              className="w-full rtl:pr-9 rtl:pl-4 ltr:pl-9 ltr:pr-4 py-2.5 border border-gray-200 dark:border-darkbg-lighter rounded-xl text-sm bg-white dark:bg-darkbg-card text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-primary-500 transition-all text-start"
             />
             {searchInput && (
               <button
                 onClick={() => { setSearchInput(''); updateParam('search', ''); }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-600 dark:text-gray-300"
+                className="absolute rtl:left-3 ltr:right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-600 dark:text-gray-300"
               >
                 <X size={14} />
               </button>
@@ -366,7 +371,7 @@ export default function ProductsPage() {
               {sortDropdownOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
             {sortDropdownOpen && (
-              <div className="absolute left-0 top-full mt-1 w-48 bg-white dark:bg-darkbg-card border border-gray-200 dark:border-darkbg-lighter rounded-xl shadow-lg z-20 overflow-hidden">
+              <div className="absolute rtl:left-0 ltr:right-0 top-full mt-1 w-48 bg-white dark:bg-darkbg-card border border-gray-200 dark:border-darkbg-lighter rounded-xl shadow-lg z-20 overflow-hidden">
                 {SORT_OPTIONS.map(opt => (
                   <button
                     key={opt.value}
@@ -374,7 +379,7 @@ export default function ProductsPage() {
                       updateParam('sort', opt.value);
                       setSortDropdownOpen(false);
                     }}
-                    className={`w-full text-right px-4 py-2.5 text-sm flex items-center gap-2 transition-colors ${
+                    className={`w-full text-start px-4 py-2.5 text-sm flex items-center gap-2 transition-colors ${
                       sortParam === opt.value
                         ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 font-semibold'
                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:bg-darkbg-lighter'
@@ -382,7 +387,7 @@ export default function ProductsPage() {
                   >
                     {opt.value === 'price_asc' && <ArrowUp size={12} />}
                     {opt.value === 'price_desc' && <ArrowDown size={12} />}
-                    {opt.label}
+                    {t(`products.sort.${opt.value}`)}
                   </button>
                 ))}
               </div>
@@ -395,7 +400,7 @@ export default function ProductsPage() {
             className="lg:hidden flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-darkbg-lighter rounded-xl text-sm bg-white dark:bg-darkbg-card text-gray-600 dark:text-gray-300 hover:border-primary-400 transition-colors"
           >
             <Filter size={14} />
-            فلترة
+            {t('products.filter')}
             {hasFilters && (
               <span className="w-5 h-5 bg-primary-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
                 !
@@ -409,7 +414,9 @@ export default function ProductsPage() {
           <div className="flex flex-wrap gap-2 mb-4">
             {categoryParam && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-400 text-xs font-medium rounded-full">
-                {categories.find(c => c.slug === categoryParam)?.name_ar ?? categoryParam}
+                {isAr 
+                  ? (categories.find(c => c.slug === categoryParam)?.name_ar ?? categoryParam)
+                  : (categories.find(c => c.slug === categoryParam)?.name_en ?? categoryParam)}
                 <button onClick={() => updateParam('category', '')} className="hover:text-primary-900 dark:hover:text-primary-200">
                   <X size={12} />
                 </button>
@@ -417,7 +424,7 @@ export default function ProductsPage() {
             )}
             {searchParam && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-400 text-xs font-medium rounded-full">
-                بحث: {searchParam}
+                {t('products.search_filter', { term: searchParam })}
                 <button onClick={() => { setSearchInput(''); updateParam('search', ''); }} className="hover:text-primary-900 dark:hover:text-primary-200">
                   <X size={12} />
                 </button>
@@ -425,7 +432,7 @@ export default function ProductsPage() {
             )}
             {(minPriceParam || maxPriceParam) && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-400 text-xs font-medium rounded-full">
-                السعر: {minPriceParam || '0'} - {maxPriceParam || '∞'} ج.م
+                {t('products.price_filter', { min: minPriceParam || '0', max: maxPriceParam || '∞' })}
                 <button
                   onClick={() => {
                     setMinPriceInput('');
@@ -450,9 +457,9 @@ export default function ProductsPage() {
           {/* Desktop sidebar */}
           <aside className="hidden lg:block w-56 flex-shrink-0">
             <div className="bg-white dark:bg-darkbg-card border border-gray-200 dark:border-darkbg-lighter rounded-2xl p-5 sticky top-24">
-              <div className="flex items-center gap-2 mb-5 pb-4 border-b border-gray-200 dark:border-darkbg-lighter">
+              <div className="flex items-center gap-2 mb-5 pb-4 border-b border-gray-200 dark:border-darkbg-lighter justify-start">
                 <SlidersHorizontal size={16} className="text-primary-600 dark:text-primary-400" />
-                <span className="font-bold text-gray-900 dark:text-white text-sm">الفلاتر</span>
+                <span className="font-bold text-gray-900 dark:text-white text-sm">{t('products.filters')}</span>
               </div>
               <SidebarContent />
             </div>
@@ -469,18 +476,18 @@ export default function ProductsPage() {
             ) : products.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-center">
                 <Package size={56} className="text-gray-500 dark:text-gray-400 mb-4" />
-                <h2 className="text-xl font-bold text-gray-600 dark:text-gray-300 mb-2">
-                  لا توجد منتجات
+                <h2 className="text-xl font-bold text-gray-600 dark:text-gray-300 mb-2 text-center">
+                  {t('products.no_products')}
                 </h2>
-                <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
-                  لم نعثر على منتجات تطابق معايير البحث
+                <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm text-center">
+                  {t('products.no_products_desc')}
                 </p>
                 {hasFilters && (
                   <button
                     onClick={clearAllFilters}
                     className="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors text-sm"
                   >
-                    مسح الفلاتر
+                    {t('products.clear_all_filters')}
                   </button>
                 )}
               </div>
@@ -501,14 +508,14 @@ export default function ProductsPage() {
                       className="flex items-center gap-2 px-8 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
                     >
                       {loadingMore && <Loader2 size={18} className="animate-spin" />}
-                      {loadingMore ? 'جاري التحميل...' : 'تحميل المزيد'}
+                      {loadingMore ? t('products.loading_more') : t('products.load_more')}
                     </button>
                   </div>
                 )}
 
                 {/* Result count */}
                 <p className="mt-6 text-center text-xs text-gray-500">
-                  عرض {products.length} من {total} منتج
+                  {t('products.showing_count', { current: products.length, total: total })}
                 </p>
               </>
             )}
@@ -518,18 +525,18 @@ export default function ProductsPage() {
 
       {/* ── Mobile filter drawer ── */}
       {mobileFilterOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden" dir="rtl">
+        <div className="fixed inset-0 z-50 lg:hidden">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileFilterOpen(false)}
           />
           {/* Panel */}
-          <div className="absolute inset-y-0 right-0 w-72 max-w-full bg-gray-50 dark:bg-darkbg shadow-2xl flex flex-col">
+          <div className="absolute inset-y-0 rtl:left-auto rtl:right-0 ltr:right-auto ltr:left-0 w-72 max-w-full bg-gray-50 dark:bg-darkbg shadow-2xl flex flex-col">
             <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-darkbg-lighter">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 justify-start">
                 <SlidersHorizontal size={16} className="text-primary-600" />
-                <span className="font-bold text-gray-900 dark:text-white">الفلاتر</span>
+                <span className="font-bold text-gray-900 dark:text-white">{t('products.filters')}</span>
               </div>
               <button
                 onClick={() => setMobileFilterOpen(false)}
@@ -546,7 +553,7 @@ export default function ProductsPage() {
                 onClick={() => setMobileFilterOpen(false)}
                 className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"
               >
-                عرض النتائج ({total})
+                {t('products.view_results', { count: total })}
               </button>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import type { Product, Review } from '../types';
 
@@ -8,6 +9,7 @@ import { ShoppingBag, Heart, Minus, Plus, ChevronRight, Share2 } from 'lucide-re
 import { useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useGlobalDiscount } from '../contexts/GlobalDiscountContext';
 import { useToast } from '../components/ui/Toast';
 import SEO, { generateStructuredData } from '../components/ui/SEO';
 import StarRating from '../components/ui/StarRating';
@@ -35,15 +37,18 @@ function RatingBar({ star, count, total }: { star: number; count: number; total:
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
+function formatDate(iso: string, locale: string) {
+  return new Date(iso).toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
+
+  const [fetchedProduct, setFetchedProduct] = useState<Product | null>(null);
   const [reviews, setReviews] = useState<ReviewWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -57,6 +62,9 @@ export default function ProductDetailPage() {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { applyGlobalDiscount } = useGlobalDiscount();
+
+  const product = fetchedProduct ? applyGlobalDiscount(fetchedProduct) : null;
 
   // ── Data fetching ─────────────────────────────────────────────────────────
 
@@ -74,7 +82,7 @@ export default function ProductDetailPage() {
         .maybeSingle();
 
       if (cancelled) return;
-      setProduct(data);
+      setFetchedProduct(data);
 
       if (data) {
         const { data: revData } = await supabase
@@ -129,16 +137,17 @@ export default function ProductDetailPage() {
   const handleAddCart = () => {
     if (!product) return;
     addItem(product, quantity);
-    showToast(`تمت إضافة ${quantity} إلى السلة`);
+    showToast(t('product_detail.added_to_cart', { count: quantity }));
   };
 
   const handleShare = async () => {
     if (!product) return;
+    const name = isAr ? product.name_ar : product.name_en;
     try {
-      await navigator.share({ title: product.name_ar, url: window.location.href });
+      await navigator.share({ title: name, url: window.location.href });
     } catch {
       await navigator.clipboard.writeText(window.location.href);
-      showToast('تم نسخ الرابط');
+      showToast(t('product_detail.share_copied'));
     }
   };
 
@@ -157,7 +166,7 @@ export default function ProductDetailPage() {
     setSubmitting(false);
 
     if (!error) {
-      showToast('تم إرسال التقييم بنجاح، في انتظار الموافقة');
+      showToast(t('product_detail.review_success'));
       setReviewComment('');
       setReviewRating(5);
     } else if (error.code === '23505') {
@@ -172,8 +181,8 @@ export default function ProductDetailPage() {
 
   const structuredData = product
     ? generateStructuredData('product', {
-        name: product.name_ar,
-        description: product.description_ar,
+        name: isAr ? product.name_ar : product.name_en,
+        description: isAr ? product.description_ar : product.description_en,
         image: primaryImage ?? images[0]?.image_url,
         slug: product.slug,
         price: effectivePrice,
@@ -196,9 +205,9 @@ export default function ProductDetailPage() {
   if (!product) {
     return (
       <div className="text-center py-32">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">المنتج غير موجود</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('product_detail.not_found')}</h2>
         <Link to="/products" className="text-primary-600 hover:underline">
-          العودة للمنتجات
+          {t('product_detail.back_to_products')}
         </Link>
       </div>
     );
@@ -207,11 +216,11 @@ export default function ProductDetailPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div dir="rtl" className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 text-start">
       {/* SEO */}
       <SEO
-        title={product.name_ar}
-        description={product.description_ar}
+        title={isAr ? product.name_ar : product.name_en}
+        description={isAr ? product.description_ar : product.description_en}
         keywords={product.tags.join(', ')}
         image={primaryImage ?? images[0]?.image_url}
         url={`/product/${product.slug}`}
@@ -230,29 +239,29 @@ export default function ProductDetailPage() {
 
       {/* Breadcrumb */}
       <nav
-        aria-label="مسار التنقل"
-        className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-8 flex-wrap"
+        aria-label="Breadcrumb"
+        className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-8 flex-wrap justify-start"
       >
         <Link to="/" className="hover:text-primary-600 transition-colors">
-          الرئيسية
+          {t('product_detail.breadcrumb_home')}
         </Link>
-        <ChevronRight size={14} className="rotate-180" />
+        <ChevronRight size={14} className="rtl:rotate-180" />
         <Link to="/products" className="hover:text-primary-600 transition-colors">
-          المنتجات
+          {t('product_detail.breadcrumb_products')}
         </Link>
         {product.category && (
           <>
-            <ChevronRight size={14} className="rotate-180" />
+            <ChevronRight size={14} className="rtl:rotate-180" />
             <Link
               to={`/products?category=${product.category.slug}`}
               className="hover:text-primary-600 transition-colors"
             >
-              {product.category.name_ar}
+              {isAr ? product.category.name_ar : product.category.name_en}
             </Link>
           </>
         )}
-        <ChevronRight size={14} className="rotate-180" />
-        <span className="text-gray-900 dark:text-white font-medium">{product.name_ar}</span>
+        <ChevronRight size={14} className="rtl:rotate-180" />
+        <span className="text-gray-900 dark:text-white font-medium">{isAr ? product.name_ar : product.name_en}</span>
       </nav>
 
       <div className="grid md:grid-cols-2 gap-8 lg:gap-14">
@@ -263,7 +272,7 @@ export default function ProductDetailPage() {
             {primaryImage ? (
               <img
                 src={primaryImage}
-                alt={product.name_ar}
+                alt={isAr ? product.name_ar : product.name_en}
                 loading="lazy"
                 decoding="async"
                 className="w-full h-full object-cover transition-opacity duration-300"
@@ -274,7 +283,7 @@ export default function ProductDetailPage() {
               </div>
             )}
             {hasDiscount && (
-              <span className="absolute top-3 right-3 bg-rose-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">
+              <span className="absolute top-3 rtl:right-3 ltr:left-3 bg-rose-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow">
                 -{discountPct}%
               </span>
             )}
@@ -282,13 +291,13 @@ export default function ProductDetailPage() {
 
           {/* Thumbnails */}
           {images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" role="list" aria-label="صور المنتج">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" role="list" aria-label="Product Images">
               {images.map((img, i) => (
                 <button
                   key={img.id}
                   onClick={() => setSelectedImage(i)}
                   role="listitem"
-                  aria-label={`صورة ${i + 1}`}
+                  aria-label={`Image ${i + 1}`}
                   aria-pressed={selectedImage === i}
                   className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                     selectedImage === i
@@ -298,7 +307,7 @@ export default function ProductDetailPage() {
                 >
                   <img
                     src={img.image_url}
-                    alt={img.alt_text || product.name_ar}
+                    alt={img.alt_text || (isAr ? product.name_ar : product.name_en)}
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover"
@@ -310,57 +319,57 @@ export default function ProductDetailPage() {
         </div>
 
         {/* ── Product Details ── */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 text-start">
           {/* Category badge */}
           {product.category && (
             <Link
               to={`/products?category=${product.category.slug}`}
               className="self-start text-xs font-semibold text-primary-700 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-3 py-1 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors"
             >
-              {product.category.name_ar}
+              {isAr ? product.category.name_ar : product.category.name_en}
             </Link>
           )}
 
           {/* Title */}
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white leading-snug">
-            {product.name_ar}
+            {isAr ? product.name_ar : product.name_en}
           </h1>
 
           {/* Aggregate rating */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 justify-start">
             <StarRating value={product.rating} readonly size={18} />
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              ({product.review_count} تقييم)
+              {product.review_count === 1 ? t('product_detail.rating_count_one') : t('product_detail.rating_count_other', { count: product.review_count })}
             </span>
             <button
               onClick={handleShare}
-              aria-label="مشاركة"
-              className="mr-auto p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+              aria-label={t('product_detail.share')}
+              className="rtl:mr-auto ltr:ml-auto p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
             >
               <Share2 size={18} />
             </button>
           </div>
 
           {/* Price */}
-          <div className="flex items-end gap-3">
+          <div className="flex items-end gap-3 justify-start">
             <span className="text-3xl font-bold text-primary-600 dark:text-primary-400">
-              {effectivePrice} ج.م
+              {effectivePrice} {t('product_detail.currency')}
             </span>
             {hasDiscount && (
               <span className="text-lg text-gray-500 dark:text-gray-400 line-through mb-0.5">
-                {product.price} ج.م
+                {product.price} {t('product_detail.currency')}
               </span>
             )}
           </div>
 
           {/* Description */}
-          <p className="text-gray-500 dark:text-gray-400 leading-relaxed">
-            {product.description_ar}
+          <p className="text-gray-500 dark:text-gray-400 leading-relaxed text-start">
+            {isAr ? product.description_ar : product.description_en}
           </p>
 
           {/* Tags */}
           {product.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 justify-start">
               {product.tags.map((tag) => (
                 <span
                   key={tag}
@@ -373,29 +382,29 @@ export default function ProductDetailPage() {
           )}
 
           {/* Stock status */}
-          <div>
+          <div className="text-start">
             {product.stock_quantity > 0 ? (
               <span className="inline-flex items-center gap-1.5 text-sm text-primary-700 dark:text-primary-400 font-medium">
                 <span className="w-2 h-2 rounded-full bg-primary-500 inline-block" />
-                متوفر في المخزون ({product.stock_quantity} قطعة)
+                {t('product_detail.in_stock', { count: product.stock_quantity })}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 text-sm text-rose-600 dark:text-rose-400 font-medium">
                 <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
-                نفد المخزون
+                {t('product_detail.out_of_stock')}
               </span>
             )}
           </div>
 
           {/* Quantity & Add to Cart */}
-          <div className="flex flex-col gap-3 pt-2">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">الكمية:</span>
+          <div className="flex flex-col gap-3 pt-2 text-start">
+            <div className="flex items-center gap-4 justify-start">
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">{t('product_detail.quantity')}</span>
               <div className="flex items-center border border-gray-200 dark:border-darkbg-lighter rounded-xl overflow-hidden">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   className="p-2.5 hover:bg-gray-100 dark:bg-darkbg-lighter transition-colors"
-                  aria-label="تقليل الكمية"
+                  aria-label="Decrease quantity"
                 >
                   <Minus size={16} />
                 </button>
@@ -406,7 +415,7 @@ export default function ProductDetailPage() {
                   onClick={() => setQuantity(Math.min(product.stock_quantity, quantity + 1))}
                   disabled={product.stock_quantity === 0}
                   className="p-2.5 hover:bg-gray-100 dark:bg-darkbg-lighter transition-colors disabled:opacity-40"
-                  aria-label="زيادة الكمية"
+                  aria-label="Increase quantity"
                 >
                   <Plus size={16} />
                 </button>
@@ -420,11 +429,11 @@ export default function ProductDetailPage() {
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white font-semibold rounded-xl transition-colors shadow-sm"
               >
                 <ShoppingBag size={18} />
-                أضف إلى السلة
+                {t('product_detail.add_to_cart')}
               </button>
               <button
                 onClick={() => toggleFavorite(product.id)}
-                aria-label={isFavorite(product.id) ? 'إزالة من المفضلة' : 'أضف للمفضلة'}
+                aria-label={isFavorite(product.id) ? t('product_detail.remove_from_favorites') : t('product_detail.add_to_favorites')}
                 className={`p-3 border rounded-xl transition-colors ${
                   isFavorite(product.id)
                     ? 'border-rose-300 bg-rose-50 dark:border-rose-700 dark:bg-rose-900/30 text-rose-500'
@@ -439,9 +448,9 @@ export default function ProductDetailPage() {
       </div>
 
       {/* ── Reviews Section ─────────────────────────────────────────────────── */}
-      <section className="mt-16 border-t border-gray-200 dark:border-darkbg-lighter pt-12">
+      <section className="mt-16 border-t border-gray-200 dark:border-darkbg-lighter pt-12 text-start">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-8">
-          التقييمات ({reviews.length})
+          {t('product_detail.reviews', { count: reviews.length })}
         </h2>
 
         {/* Rating summary + distribution */}
@@ -454,7 +463,7 @@ export default function ProductDetailPage() {
               </span>
               <StarRating value={product.rating} readonly size={20} />
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {reviews.length} تقييم
+                {reviews.length === 1 ? t('product_detail.rating_count_one') : t('product_detail.rating_count_other', { count: reviews.length })}
               </span>
             </div>
 
@@ -469,11 +478,11 @@ export default function ProductDetailPage() {
 
         {/* Review form — authenticated users who haven't reviewed yet */}
         {user && !userHasReviewed && !duplicateReview && (
-          <div className="bg-white dark:bg-darkbg-card border border-gray-200 dark:border-darkbg-lighter rounded-2xl p-6 mb-8">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">أضف تقييمك</h3>
+          <div className="bg-white dark:bg-darkbg-card border border-gray-200 dark:border-darkbg-lighter rounded-2xl p-6 mb-8 text-start">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">{t('product_detail.add_review')}</h3>
 
             <div className="mb-4">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">تقييمك:</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{t('product_detail.your_rating')}</p>
               <StarRating value={reviewRating} onChange={setReviewRating} size={28} />
             </div>
 
@@ -482,9 +491,9 @@ export default function ProductDetailPage() {
               onChange={(e) => setReviewComment(e.target.value)}
               rows={4}
               maxLength={1000}
-              placeholder="اكتب تجربتك مع هذا المنتج..."
-              dir="rtl"
-              className="w-full px-4 py-3 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 transition-all resize-none text-sm"
+              placeholder={t('product_detail.review_placeholder')}
+            
+              className="w-full px-4 py-3 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 transition-all resize-none text-sm text-start"
             />
             <div className="flex items-center justify-between mt-3">
               <span className="text-xs text-gray-500 dark:text-gray-400">{reviewComment.length}/1000</span>
@@ -493,7 +502,7 @@ export default function ProductDetailPage() {
                 disabled={!reviewComment.trim() || submitting}
                 className="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white font-medium rounded-xl transition-colors text-sm"
               >
-                {submitting ? 'جارٍ الإرسال...' : 'إرسال التقييم'}
+                {submitting ? t('product_detail.submitting_review') : t('product_detail.submit_review')}
               </button>
             </div>
           </div>
@@ -501,8 +510,8 @@ export default function ProductDetailPage() {
 
         {/* Duplicate review notice */}
         {duplicateReview && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl p-4 mb-8 text-amber-800 dark:text-amber-300 text-sm">
-            لقد قمت بتقييم هذا المنتج من قبل. يمكنك تقييم منتج واحد مرة واحدة فقط.
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl p-4 mb-8 text-amber-800 dark:text-amber-300 text-sm text-start">
+            {t('product_detail.already_reviewed')}
           </div>
         )}
 
@@ -510,38 +519,38 @@ export default function ProductDetailPage() {
         {!user && (
           <div className="bg-gray-100 dark:bg-darkbg-lighter border border-gray-200 dark:border-darkbg-lighter rounded-2xl p-5 mb-8 text-center">
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
-              سجّل دخولك لإضافة تقييم
+              {t('product_detail.login_to_review')}
             </p>
             <Link
               to="/login"
               className="inline-block px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors"
             >
-              تسجيل الدخول
+              {t('product_detail.login')}
             </Link>
           </div>
         )}
 
         {/* User already reviewed — show friendly notice */}
         {user && userHasReviewed && !duplicateReview && (
-          <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700 rounded-2xl p-4 mb-8 text-primary-800 dark:text-primary-300 text-sm">
-            شكراً لك! لقد قمت بتقييم هذا المنتج.
+          <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700 rounded-2xl p-4 mb-8 text-primary-800 dark:text-primary-300 text-sm text-start">
+            {t('product_detail.thank_you_review')}
           </div>
         )}
 
         {/* Review list */}
         {reviews.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400 text-center py-12">
-            لا توجد تقييمات بعد — كن أول من يقيّم!
+            {t('product_detail.no_reviews')}
           </p>
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => {
               const reviewUser = review.user;
-              const initial = (reviewUser?.full_name?.[0] ?? 'م').toUpperCase();
+              const initial = (reviewUser?.full_name?.[0] ?? 'U').toUpperCase();
               return (
                 <article
                   key={review.id}
-                  className="bg-white dark:bg-darkbg-card border border-gray-200 dark:border-darkbg-lighter rounded-2xl p-6"
+                  className="bg-white dark:bg-darkbg-card border border-gray-200 dark:border-darkbg-lighter rounded-2xl p-6 text-start"
                 >
                   <div className="flex items-start gap-3 mb-3">
                     {/* Avatar */}
@@ -554,19 +563,19 @@ export default function ProductDetailPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">
-                          {reviewUser?.full_name ?? 'مستخدم'}
+                          {reviewUser?.full_name ?? t('product_detail.anonymous_user')}
                         </p>
                         <time
                           dateTime={review.created_at}
                           className="text-xs text-gray-500 shrink-0"
                         >
-                          {formatDate(review.created_at)}
+                          {formatDate(review.created_at, i18n.language)}
                         </time>
                       </div>
                       <StarRating value={review.rating} readonly size={14} />
                     </div>
                   </div>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed text-start">
                     {review.comment}
                   </p>
                 </article>

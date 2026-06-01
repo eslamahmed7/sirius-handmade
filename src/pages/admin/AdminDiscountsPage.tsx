@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import type { Discount, Product, Category } from '../../types';
 import { Plus, Pencil, Trash2, X, Tag, Calendar, Target, Zap, AlertCircle } from 'lucide-react';
@@ -30,6 +31,8 @@ const emptyForm: DiscountForm = {
 };
 
 export default function AdminDiscountsPage() {
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -37,6 +40,8 @@ export default function AdminDiscountsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<DiscountForm>(emptyForm);
+  const [showGlobalForm, setShowGlobalForm] = useState(false);
+  const [globalForm, setGlobalForm] = useState({ discount_value: '', expires_at: '' });
   const [filter, setFilter] = useState<'all' | 'active' | 'expired' | 'scheduled'>('all');
   const { showToast } = useToast();
 
@@ -68,7 +73,27 @@ export default function AdminDiscountsPage() {
     setShowForm(true);
   }
 
+  function openGlobalCreate() {
+    setGlobalForm({ discount_value: '', expires_at: '' });
+    setEditingId(null);
+    setShowGlobalForm(true);
+  }
+
+  function openGlobalEdit(d: Discount) {
+    setGlobalForm({
+      discount_value: d.discount_value.toString(),
+      expires_at: d.expires_at ? d.expires_at.slice(0, 16) : ''
+    });
+    setEditingId(d.id);
+    setShowGlobalForm(true);
+  }
+
   function openEdit(d: Discount) {
+    if (d.scope === 'global' && d.auto_apply) {
+      openGlobalEdit(d);
+      return;
+    }
+
     setForm({
       code: d.code,
       description_ar: d.description_ar,
@@ -121,6 +146,44 @@ export default function AdminDiscountsPage() {
     loadDiscounts();
   }
 
+  async function handleGlobalSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (editingId) {
+      const { error } = await supabase.from('discounts').update({
+        discount_value: Number(globalForm.discount_value),
+        expires_at: globalForm.expires_at || null,
+      }).eq('id', editingId);
+      
+      if (error) { showToast(error.message, 'error'); return; }
+      showToast('تم تحديث الخصم العام بنجاح');
+    } else {
+      const discountData: Record<string, unknown> = {
+        code: 'GLOBAL-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+        description_ar: 'خصم عام على جميع المنتجات لفترة محدودة',
+        description_en: 'Global discount on all products for a limited time',
+        discount_type: 'percentage',
+        discount_value: Number(globalForm.discount_value),
+        min_order_amount: 0,
+        max_uses: null,
+        starts_at: new Date().toISOString(),
+        expires_at: globalForm.expires_at || null,
+        is_active: true,
+        scope: 'global',
+        product_ids: [],
+        category_ids: [],
+        auto_apply: true,
+      };
+
+      const { error } = await supabase.from('discounts').insert(discountData);
+      if (error) { showToast(error.message, 'error'); return; }
+      showToast('تم إنشاء الخصم العام بنجاح');
+    }
+
+    setShowGlobalForm(false);
+    loadDiscounts();
+  }
+
   async function handleDelete(id: string) {
     if (!confirm('هل أنت متأكد من حذف هذا الخصم؟')) return;
     const { error } = await supabase.from('discounts').delete().eq('id', id);
@@ -150,9 +213,14 @@ export default function AdminDiscountsPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">إدارة الخصومات</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{discounts.length} خصم</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-          <Plus size={18} /> إضافة خصم
-        </button>
+        <div className="flex gap-2">
+          <button onClick={openGlobalCreate} className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-xl transition-colors">
+            <Zap size={18} /> خصم عام
+          </button>
+          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+            <Plus size={18} /> إضافة خصم
+          </button>
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -207,7 +275,7 @@ export default function AdminDiscountsPage() {
                       <div className="mt-2 flex flex-wrap gap-1">
                         {d.product_ids.slice(0, 3).map(pid => {
                           const p = products.find(pr => pr.id === pid);
-                          return p ? <span key={pid} className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs">{p.name_ar}</span> : null;
+                          return p ? <span key={pid} className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs">{isAr ? p.name_ar : (p.name_en || p.name_ar)}</span> : null;
                         })}
                         {d.product_ids.length > 3 && <span className="text-xs text-gray-500 dark:text-gray-400">+{d.product_ids.length - 3} أخرى</span>}
                       </div>
@@ -216,7 +284,7 @@ export default function AdminDiscountsPage() {
                       <div className="mt-2 flex flex-wrap gap-1">
                         {d.category_ids.map(cid => {
                           const c = categories.find(cat => cat.id === cid);
-                          return c ? <span key={cid} className="px-2 py-0.5 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded text-xs">{c.name_ar}</span> : null;
+                          return c ? <span key={cid} className="px-2 py-0.5 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded text-xs">{isAr ? c.name_ar : (c.name_en || c.name_ar)}</span> : null;
                         })}
                       </div>
                     )}
@@ -283,7 +351,7 @@ export default function AdminDiscountsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الوصف بالعربية</label>
-                  <input value={form.description_ar} onChange={e => setForm(f => ({ ...f, description_ar: e.target.value }))} dir="rtl"
+                  <input value={form.description_ar} onChange={e => setForm(f => ({ ...f, description_ar: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" />
                 </div>
                 <div>
@@ -339,7 +407,7 @@ export default function AdminDiscountsPage() {
                             ...f,
                             product_ids: e.target.checked ? [...f.product_ids, p.id] : f.product_ids.filter(id => id !== p.id),
                           }))} className="w-4 h-4 rounded" />
-                        <span className="text-sm text-gray-600 dark:text-gray-300">{p.name_ar}</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">{isAr ? p.name_ar : (p.name_en || p.name_ar)}</span>
                       </label>
                     ))}
                     {products.length === 0 && <p className="text-sm text-gray-500 dark:text-gray-400 py-2 text-center">لا توجد منتجات</p>}
@@ -355,7 +423,7 @@ export default function AdminDiscountsPage() {
                             ...f,
                             category_ids: e.target.checked ? [...f.category_ids, c.id] : f.category_ids.filter(id => id !== c.id),
                           }))} className="w-4 h-4 rounded" />
-                        <span className="text-sm text-gray-600 dark:text-gray-300">{c.name_ar}</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">{isAr ? c.name_ar : (c.name_en || c.name_ar)}</span>
                       </label>
                     ))}
                   </div>
@@ -385,6 +453,52 @@ export default function AdminDiscountsPage() {
                   {editingId ? 'حفظ التعديلات' : 'إنشاء الخصم'}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2.5 border border-gray-200 dark:border-darkbg-lighter text-gray-600 dark:text-gray-300 font-medium rounded-xl text-sm">إلغاء</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Global Discount Form Modal */}
+      {showGlobalForm && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-start justify-center pt-6 px-4 overflow-auto" onClick={() => setShowGlobalForm(false)}>
+          <div className="w-full max-w-lg bg-white dark:bg-darkbg-card rounded-2xl shadow-2xl mb-10" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-200 dark:border-darkbg-lighter flex items-center justify-between">
+              <div className="flex items-center gap-2 text-rose-600">
+                <Zap size={24} />
+                <h2 className="font-bold text-lg text-gray-900 dark:text-white">{editingId ? 'تعديل الخصم العام' : 'إضافة خصم عام'}</h2>
+              </div>
+              <button onClick={() => setShowGlobalForm(false)}><X size={20} className="text-gray-500 dark:text-gray-400" /></button>
+            </div>
+            <form onSubmit={handleGlobalSubmit} className="p-6 space-y-5">
+              <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-xl text-sm text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                الخصم العام سيظهر في أعلى الموقع وسيطبق تلقائياً على جميع المنتجات، متجاوزاً أي خصومات فردية سابقة للمنتجات.
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                  نسبة الخصم (%) *
+                </label>
+                <input type="number" min="1" max="100" required
+                  value={globalForm.discount_value} onChange={e => setGlobalForm(f => ({ ...f, discount_value: e.target.value }))}
+                  placeholder="مثال: 15"
+                  className="w-full px-3 py-3 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all text-sm" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">
+                  تاريخ ووقت الانتهاء (اختياري)
+                </label>
+                <input type="datetime-local" 
+                  value={globalForm.expires_at} onChange={e => setGlobalForm(f => ({ ...f, expires_at: e.target.value }))}
+                  className="w-full px-3 py-3 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-all text-sm" />
+                <p className="text-xs text-gray-500 mt-2">إذا لم تحدد وقتاً، سيستمر الخصم حتى تقوم بحذفه أو إيقافه يدوياً.</p>
+              </div>
+
+              <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-darkbg-lighter">
+                <button type="submit" className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-xl transition-colors text-sm w-full">
+                  {editingId ? 'حفظ التعديلات' : 'تفعيل الخصم العام'}
+                </button>
               </div>
             </form>
           </div>

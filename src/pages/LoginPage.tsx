@@ -62,7 +62,7 @@ export default function LoginPage() {
         url="/login"
       />
 
-      <div dir="rtl" className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50 dark:bg-darkbg">
+      <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50 dark:bg-darkbg">
         <div className="w-full max-w-md">
 
           {/* ── Logo / Brand ── */}
