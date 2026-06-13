@@ -1,4 +1,4 @@
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDrUrUMSG_PIsqbghYF7fAiUY6e0xD10xc';
+const apiKey = 'AIzaSyDrUrUMSG_PIsqbghYF7fAiUY6e0xD10xc';
 
 async function callGemini(prompt: string): Promise<string> {
   if (!apiKey) {

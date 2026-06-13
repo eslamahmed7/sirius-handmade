@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyDrUrUMSG_PIsqbghYF7fAiUY6e0xD10xc';
+const apiKey = 'AIzaSyDrUrUMSG_PIsqbghYF7fAiUY6e0xD10xc';
 
 export interface ChatMessage {
   role: 'user' | 'model';
