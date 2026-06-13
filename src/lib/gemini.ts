@@ -1,12 +1,16 @@
-let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+let envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 async function callGemini(promptText: string): Promise<string> {
-  let currentApiKey = apiKey || localStorage.getItem('gemini_api_key');
+  if (localStorage.getItem('ignore_env_key') === 'true') {
+    envApiKey = null;
+  }
+  let currentApiKey = localStorage.getItem('gemini_api_key') || envApiKey;
   
   if (!currentApiKey) {
     const userInput = prompt('الرجاء إدخال مفتاح Gemini API الخاص بك (سيتم حفظه في المتصفح الحالي):');
     if (userInput && userInput.trim()) {
       localStorage.setItem('gemini_api_key', userInput.trim());
+      localStorage.removeItem('ignore_env_key'); // Reset ignore flag on new input
       currentApiKey = userInput.trim();
     } else {
       throw new Error('مفتاح API الخاص بـ Gemini غير متوفر. يرجى إدخاله للتمكن من استخدام الميزات الذكية.');
@@ -39,6 +43,7 @@ async function callGemini(promptText: string): Promise<string> {
     
     if (response.status === 401 || response.status === 400) {
       localStorage.removeItem('gemini_api_key');
+      localStorage.setItem('ignore_env_key', 'true');
       throw new Error('مفتاح الـ API غير صالح أو مقيد. تم مسح المفتاح المحفوظ، يرجى تحديث الصفحة وإدخال مفتاح صحيح.');
     }
     throw new Error(message);
