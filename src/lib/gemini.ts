@@ -1,17 +1,24 @@
-const apiKey = 'AIzaSyDrUrUMSG_PIsqbghYF7fAiUY6e0xD10xc';
+let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-async function callGemini(prompt: string): Promise<string> {
-  if (!apiKey) {
-    throw new Error('مفتاح API الخاص بـ Gemini غير مهيأ في ملف البيئة VITE_GEMINI_API_KEY');
+async function callGemini(promptText: string): Promise<string> {
+  let currentApiKey = apiKey || localStorage.getItem('gemini_api_key');
+  
+  if (!currentApiKey) {
+    const userInput = prompt('الرجاء إدخال مفتاح Gemini API الخاص بك (سيتم حفظه في المتصفح الحالي):');
+    if (userInput && userInput.trim()) {
+      localStorage.setItem('gemini_api_key', userInput.trim());
+      currentApiKey = userInput.trim();
+    } else {
+      throw new Error('مفتاح API الخاص بـ Gemini غير متوفر. يرجى إدخاله للتمكن من استخدام الميزات الذكية.');
+    }
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${currentApiKey}`;
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
     },
     body: JSON.stringify({
       contents: [{
@@ -30,8 +37,9 @@ async function callGemini(prompt: string): Promise<string> {
     const errorData = await response.json().catch(() => ({}));
     const message = errorData.error?.message || `خطأ من خادم Google (كود ${response.status})`;
     
-    if (response.status === 401) {
-      throw new Error('مفتاح الـ API غير صالح أو مقيد من Google (حدث خطأ 401). يرجى التأكد من استخدام مفتاح AIzaSy قياسي صالح.');
+    if (response.status === 401 || response.status === 400) {
+      localStorage.removeItem('gemini_api_key');
+      throw new Error('مفتاح الـ API غير صالح أو مقيد. تم مسح المفتاح المحفوظ، يرجى تحديث الصفحة وإدخال مفتاح صحيح.');
     }
     throw new Error(message);
   }

@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-const apiKey = 'AIzaSyDrUrUMSG_PIsqbghYF7fAiUY6e0xD10xc';
+let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 export interface ChatMessage {
   role: 'user' | 'model';
@@ -121,8 +121,16 @@ export async function executeSiriusTool(name: string, args: any): Promise<any> {
 }
 
 export async function sendMessageToSiriusAgent(chatHistory: ChatMessage[], userText: string): Promise<{ history: ChatMessage[]; textResponse: string }> {
-  if (!apiKey) {
-    throw new Error('مفتاح الـ API لـ Gemini غير متاح في المتغيرات البيئية.');
+  let currentApiKey = apiKey || localStorage.getItem('gemini_api_key');
+  
+  if (!currentApiKey) {
+    const userInput = prompt('الرجاء إدخال مفتاح Gemini API الخاص بك (سيتم حفظه في المتصفح الحالي):');
+    if (userInput && userInput.trim()) {
+      localStorage.setItem('gemini_api_key', userInput.trim());
+      currentApiKey = userInput.trim();
+    } else {
+      throw new Error('مفتاح الـ API لـ Gemini غير متوفر. يرجى إدخال المفتاح للعمل.');
+    }
   }
 
   // Add the user message to history
@@ -218,7 +226,7 @@ export async function sendMessageToSiriusAgent(chatHistory: ChatMessage[], userT
     }]
   };
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${currentApiKey}`;
 
   // Start Agent Loop
   let loopCount = 0;
@@ -230,7 +238,7 @@ export async function sendMessageToSiriusAgent(chatHistory: ChatMessage[], userT
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
+        'x-goog-api-key': currentApiKey,
       },
       body: JSON.stringify({
         contents: currentHistory,
@@ -245,6 +253,10 @@ export async function sendMessageToSiriusAgent(chatHistory: ChatMessage[], userT
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      if (response.status === 401 || response.status === 400) {
+        localStorage.removeItem('gemini_api_key');
+        throw new Error('مفتاح الـ API غير صالح أو مقيد. تم مسح المفتاح، يرجى تحديث الصفحة وإدخال مفتاح صحيح.');
+      }
       throw new Error(errorData.error?.message || `خطأ من خادم Google (كود ${response.status})`);
     }
 
