@@ -5,6 +5,8 @@ import type { Product, Category, ProductImage } from '../../types';
 import { Plus, Pencil, Trash2, Search, X, Upload, Image } from 'lucide-react';
 import { useToast } from '../../components/ui/Toast';
 import { uploadImage } from '../../lib/upload';
+import { generateProductDescription, translateText, suggestTags } from '../../lib/gemini';
+
 
 interface ProductForm {
   name_ar: string;
@@ -40,6 +42,13 @@ export default function AdminProductsPage() {
   const [newImages, setNewImages] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
   const { showToast } = useToast();
+
+  const [loadingAiDescAr, setLoadingAiDescAr] = useState(false);
+  const [loadingAiDescEn, setLoadingAiDescEn] = useState(false);
+  const [loadingAiTranslateName, setLoadingAiTranslateName] = useState(false);
+  const [loadingAiTranslateDesc, setLoadingAiTranslateDesc] = useState(false);
+  const [loadingAiTags, setLoadingAiTags] = useState(false);
+
 
   useEffect(() => {
     supabase.from('categories').select('*').order('sort_order').then(({ data }) => setCategories(data ?? []));
@@ -251,23 +260,169 @@ export default function AdminProductsPage() {
             <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-auto">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الاسم بالعربية *</label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">الاسم بالعربية *</label>
+                    {form.name_en && (
+                      <button
+                        type="button"
+                        disabled={loadingAiTranslateName}
+                        onClick={async () => {
+                          setLoadingAiTranslateName(true);
+                          try {
+                            const translation = await translateText(form.name_en, 'ar');
+                            setForm(f => ({ ...f, name_ar: translation }));
+                            showToast('تمت ترجمة الاسم بنجاح');
+                          } catch (err: any) {
+                            showToast(err.message, 'error');
+                          } finally {
+                            setLoadingAiTranslateName(false);
+                          }
+                        }}
+                        className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1 font-medium disabled:opacity-50"
+                      >
+                        {loadingAiTranslateName ? 'جاري الترجمة...' : '✨ ترجمة من الإنجليزية'}
+                      </button>
+                    )}
+                  </div>
                   <input value={form.name_ar} onChange={e => setForm(f => ({ ...f, name_ar: e.target.value }))} required
                     className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الاسم بالإنجليزية</label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">الاسم بالإنجليزية</label>
+                    {form.name_ar && (
+                      <button
+                        type="button"
+                        disabled={loadingAiTranslateName}
+                        onClick={async () => {
+                          setLoadingAiTranslateName(true);
+                          try {
+                            const translation = await translateText(form.name_ar, 'en');
+                            setForm(f => ({ ...f, name_en: translation }));
+                            showToast('تمت ترجمة الاسم بنجاح');
+                          } catch (err: any) {
+                            showToast(err.message, 'error');
+                          } finally {
+                            setLoadingAiTranslateName(false);
+                          }
+                        }}
+                        className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1 font-medium disabled:opacity-50"
+                      >
+                        {loadingAiTranslateName ? 'جاري الترجمة...' : '✨ ترجمة من العربية'}
+                      </button>
+                    )}
+                  </div>
                   <input value={form.name_en} onChange={e => setForm(f => ({ ...f, name_en: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الوصف بالعربية</label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">الوصف بالعربية</label>
+                  <div className="flex gap-2">
+                    {form.description_en && (
+                      <button
+                        type="button"
+                        disabled={loadingAiTranslateDesc}
+                        onClick={async () => {
+                          setLoadingAiTranslateDesc(true);
+                          try {
+                            const translation = await translateText(form.description_en, 'ar');
+                            setForm(f => ({ ...f, description_ar: translation }));
+                            showToast('تمت ترجمة الوصف بنجاح');
+                          } catch (err: any) {
+                            showToast(err.message, 'error');
+                          } finally {
+                            setLoadingAiTranslateDesc(false);
+                          }
+                        }}
+                        className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1 font-medium disabled:opacity-50"
+                      >
+                        {loadingAiTranslateDesc ? 'جاري الترجمة...' : '✨ ترجمة الوصف'}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      disabled={loadingAiDescAr}
+                      onClick={async () => {
+                        const name = form.name_ar || form.name_en;
+                        if (!name) {
+                          showToast('يرجى كتابة اسم المنتج أولاً لتوليد الوصف', 'error');
+                          return;
+                        }
+                        setLoadingAiDescAr(true);
+                        try {
+                          const catName = categories.find(c => c.id === form.category_id)?.name_ar || '';
+                          const desc = await generateProductDescription(name, catName, form.tags, 'ar');
+                          setForm(f => ({ ...f, description_ar: desc }));
+                          showToast('تم توليد الوصف بالذكاء الاصطناعي');
+                        } catch (err: any) {
+                          showToast(err.message, 'error');
+                        } finally {
+                          setLoadingAiDescAr(false);
+                        }
+                      }}
+                      className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1 font-medium disabled:opacity-50"
+                    >
+                      {loadingAiDescAr ? 'جاري التوليد...' : '✨ توليد بالذكاء الاصطناعي'}
+                    </button>
+                  </div>
+                </div>
                 <textarea value={form.description_ar} onChange={e => setForm(f => ({ ...f, description_ar: e.target.value }))} rows={3}
                   className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm resize-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الوصف بالإنجليزية</label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">الوصف بالإنجليزية</label>
+                  <div className="flex gap-2">
+                    {form.description_ar && (
+                      <button
+                        type="button"
+                        disabled={loadingAiTranslateDesc}
+                        onClick={async () => {
+                          setLoadingAiTranslateDesc(true);
+                          try {
+                            const translation = await translateText(form.description_ar, 'en');
+                            setForm(f => ({ ...f, description_en: translation }));
+                            showToast('تمت ترجمة الوصف بنجاح');
+                          } catch (err: any) {
+                            showToast(err.message, 'error');
+                          } finally {
+                            setLoadingAiTranslateDesc(false);
+                          }
+                        }}
+                        className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1 font-medium disabled:opacity-50"
+                      >
+                        {loadingAiTranslateDesc ? 'جاري الترجمة...' : '✨ ترجمة الوصف'}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      disabled={loadingAiDescEn}
+                      onClick={async () => {
+                        const name = form.name_en || form.name_ar;
+                        if (!name) {
+                          showToast('يرجى كتابة اسم المنتج أولاً لتوليد الوصف', 'error');
+                          return;
+                        }
+                        setLoadingAiDescEn(true);
+                        try {
+                          const catName = categories.find(c => c.id === form.category_id)?.name_en || '';
+                          const desc = await generateProductDescription(name, catName, form.tags, 'en');
+                          setForm(f => ({ ...f, description_en: desc }));
+                          showToast('تم توليد الوصف بالذكاء الاصطناعي');
+                        } catch (err: any) {
+                          showToast(err.message, 'error');
+                        } finally {
+                          setLoadingAiDescEn(false);
+                        }
+                      }}
+                      className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1 font-medium disabled:opacity-50"
+                    >
+                      {loadingAiDescEn ? 'جاري التوليد...' : '✨ توليد بالذكاء الاصطناعي'}
+                    </button>
+                  </div>
+                </div>
                 <textarea value={form.description_en} onChange={e => setForm(f => ({ ...f, description_en: e.target.value }))} rows={3}
                   className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm resize-none" />
               </div>
@@ -298,7 +453,34 @@ export default function AdminProductsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">الوسوم (مفصولة بفاصلة)</label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">الوسوم (مفصولة بفاصلة)</label>
+                    <button
+                      type="button"
+                      disabled={loadingAiTags}
+                      onClick={async () => {
+                        const name = form.name_ar || form.name_en;
+                        if (!name) {
+                          showToast('يرجى كتابة اسم المنتج أولاً لاقتراح الوسوم', 'error');
+                          return;
+                        }
+                        setLoadingAiTags(true);
+                        try {
+                          const catName = categories.find(c => c.id === form.category_id)?.name_ar || '';
+                          const suggested = await suggestTags(name, catName);
+                          setForm(f => ({ ...f, tags: suggested.join(', ') }));
+                          showToast('تم اقتراح الوسوم وتحديث الحقل');
+                        } catch (err: any) {
+                          showToast(err.message, 'error');
+                        } finally {
+                          setLoadingAiTags(false);
+                        }
+                      }}
+                      className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1 font-medium disabled:opacity-50"
+                    >
+                      {loadingAiTags ? 'جاري الاقتراح...' : '✨ اقتراح وسوم'}
+                    </button>
+                  </div>
                   <input value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} placeholder="ريزين, هدية, ديكور"
                     className="w-full px-3 py-2 border border-gray-200 dark:border-darkbg-lighter rounded-xl bg-gray-100 dark:bg-darkbg-lighter text-gray-900 dark:text-white outline-none focus:border-primary-500 text-sm" />
                 </div>

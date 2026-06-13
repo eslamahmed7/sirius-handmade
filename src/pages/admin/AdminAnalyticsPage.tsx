@@ -176,48 +176,126 @@ export default function AdminAnalyticsPage() {
       const wb = XLSX.utils.book_new();
 
       if (data) {
-        // Summary sheet
-        const summaryData = [
-          ['Metric', 'Value'],
-          ['Total Revenue', data.totalRevenue],
-          ['Total Orders', data.totalOrders],
-          ['Avg Order Value', data.avgOrderValue],
-          ['Total Discounts', data.totalDiscounts],
-          ['Total Customers', data.totalCustomers],
-          ['Buying Customers', data.uniqueBuyingCustomers],
-          ['Conversion Rate', `${data.conversionMetrics?.conversionRate}%`],
+        // 1. Dashboard (لوحة التحكم) Sheet
+        const dashboardData: any[][] = [
+          ['سيريوس هاند ميد - لوحة تحكم الأداء والتحليلات', '', '', ''],
+          [],
+          ['مؤشر الأداء الرئيسي', 'القيمة', 'مؤشر إضافي', 'القيمة'],
+          ['إجمالي الإيرادات', { t: 'n', f: "SUM('المبيعات والإيرادات'!B2:B100)", z: '#,##0.00" ج.م"' }, 'إجمالي الطلبات', { t: 'n', f: "SUM('المبيعات والإيرادات'!C2:C100)", z: '#,##0' }],
+          ['متوسط قيمة الطلب', { t: 'n', f: 'IF(D4>0, B4/D4, 0)', z: '#,##0.00" ج.م"' }, 'إجمالي الخصومات', { t: 'n', f: "SUM('المبيعات والإيرادات'!D2:D100)", z: '#,##0.00" ج.م"' }],
+          ['إجمالي العملاء الجدد', { t: 'n', f: "SUM('نمو العملاء'!B2:B100)", z: '#,##0' }, 'معدل التحويل', { t: 'n', v: Number(data.conversionMetrics?.conversionRate || 0) / 100, z: '0.0%' }],
+          [],
+          ['المنتجات الأكثر مبيعاً (أعلى 10)', '', '', ''],
+          ['اسم المنتج', 'الكمية المباعة', 'الإيرادات', 'نسبة المساهمة']
         ];
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), 'Summary');
 
-        // Revenue sheet
-        if (data.revenueByPeriod?.length) {
-          const revData = [['Period', 'Revenue', 'Orders', 'Discounts'], ...data.revenueByPeriod.map(r => [r.period, r.revenue, r.orders, r.discounts])];
-          XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(revData), 'Revenue');
-
-        }
-
-        // Products sheet
         if (data.topProducts?.length) {
-          const prodData = [['Product', 'Quantity', 'Revenue'], ...data.topProducts.map(p => [p.name_en, p.quantity, p.revenue])];
-          XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(prodData), 'Top Products');
+          data.topProducts.slice(0, 10).forEach((p, idx) => {
+            const rowIdx = 10 + idx; // Row number in Excel starts at 10 for first product
+            dashboardData.push([
+              isAr ? p.name_ar : (p.name_en || p.name_ar),
+              { t: 'n', v: p.quantity, z: '#,##0' },
+              { t: 'n', v: p.revenue, z: '#,##0.00" ج.م"' },
+              { t: 'n', f: `C${rowIdx}/B4`, z: '0.0%' }
+            ]);
+          });
         }
 
-        // Customers sheet
+        const wsDashboard = XLSX.utils.aoa_to_sheet(dashboardData);
+        wsDashboard['!merges'] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }, // Title banner
+          { s: { r: 7, c: 0 }, e: { r: 7, c: 3 } }  // Products title
+        ];
+        wsDashboard['!cols'] = [
+          { wch: 25 }, // Col A
+          { wch: 20 }, // Col B
+          { wch: 25 }, // Col C
+          { wch: 20 }  // Col D
+        ];
+        XLSX.utils.book_append_sheet(wb, wsDashboard, 'لوحة التحكم');
+
+        // 2. Revenue and Sales (المبيعات والإيرادات) Sheet
+        if (data.revenueByPeriod?.length) {
+          const revRows = data.revenueByPeriod.length;
+          const revData: any[][] = [
+            ['الفترة', 'الإيرادات', 'الطلبات', 'الخصومات'],
+            ...data.revenueByPeriod.map(r => [
+              r.period,
+              { t: 'n', v: r.revenue, z: '#,##0.00" ج.م"' },
+              { t: 'n', v: r.orders, z: '#,##0' },
+              { t: 'n', v: r.discounts, z: '#,##0.00" ج.م"' }
+            ])
+          ];
+          revData.push([
+            'الإجمالي',
+            { t: 'n', f: `SUM(B2:B${revRows + 1})`, z: '#,##0.00" ج.م"' },
+            { t: 'n', f: `SUM(C2:C${revRows + 1})`, z: '#,##0' },
+            { t: 'n', f: `SUM(D2:D${revRows + 1})`, z: '#,##0.00" ج.م"' }
+          ]);
+          const wsRevenue = XLSX.utils.aoa_to_sheet(revData);
+          wsRevenue['!cols'] = [
+            { wch: 15 },
+            { wch: 20 },
+            { wch: 15 },
+            { wch: 20 }
+          ];
+          XLSX.utils.book_append_sheet(wb, wsRevenue, 'المبيعات والإيرادات');
+        }
+
+        // 3. Top Products (المنتجات الأكثر مبيعاً) Sheet
+        if (data.topProducts?.length) {
+          const prodRows = data.topProducts.length;
+          const prodData: any[][] = [
+            ['المنتج', 'الكمية المباعة', 'الإيرادات'],
+            ...data.topProducts.map(p => [
+              isAr ? p.name_ar : (p.name_en || p.name_ar),
+              { t: 'n', v: p.quantity, z: '#,##0' },
+              { t: 'n', v: p.revenue, z: '#,##0.00" ج.م"' }
+            ])
+          ];
+          prodData.push([
+            'الإجمالي',
+            { t: 'n', f: `SUM(B2:B${prodRows + 1})`, z: '#,##0' },
+            { t: 'n', f: `SUM(C2:C${prodRows + 1})`, z: '#,##0.00" ج.م"' }
+          ]);
+          const wsProducts = XLSX.utils.aoa_to_sheet(prodData);
+          wsProducts['!cols'] = [
+            { wch: 35 },
+            { wch: 18 },
+            { wch: 20 }
+          ];
+          XLSX.utils.book_append_sheet(wb, wsProducts, 'المنتجات الأكثر مبيعاً');
+        }
+
+        // 4. Customer Growth (نمو العملاء) Sheet
         if (data.customerGrowth?.length) {
-          const custData = [['Period', 'New Customers'], ...data.customerGrowth.map(c => [c.period, c.count])];
-          XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(custData), 'Customer Growth');
-        }
-
-        // Orders sheet
-        if (data.orderGrowth?.length) {
-          const ordData = [['Period', 'Orders'], ...data.orderGrowth.map(o => [o.period, o.count])];
-          XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ordData), 'Order Growth');
+          const custRows = data.customerGrowth.length;
+          const custData: any[][] = [
+            ['الفترة', 'العملاء الجدد'],
+            ...data.customerGrowth.map(c => [
+              c.period,
+              { t: 'n', v: c.count, z: '#,##0' }
+            ])
+          ];
+          custData.push([
+            'الإجمالي',
+            { t: 'n', f: `SUM(B2:B${custRows + 1})`, z: '#,##0' }
+          ]);
+          const wsCustomers = XLSX.utils.aoa_to_sheet(custData);
+          wsCustomers['!cols'] = [
+            { wch: 15 },
+            { wch: 18 }
+          ];
+          XLSX.utils.book_append_sheet(wb, wsCustomers, 'نمو العملاء');
         }
       }
 
-      XLSX.writeFile(wb, `analytics-report-${period}-${new Date().toISOString().split('T')[0]}.xlsx`);
-      showToast('تم تصدير التقرير Excel');
-    } catch { showToast('فشل تصدير Excel', 'error'); }
+      XLSX.writeFile(wb, `تقرير-تحليلات-سيريوس-${period}-${new Date().toISOString().split('T')[0]}.xlsx`);
+      showToast('تم تصدير التقرير Excel بنجاح');
+    } catch (err) {
+      console.error(err);
+      showToast('فشل تصدير Excel', 'error');
+    }
     setExporting(false);
   };
 

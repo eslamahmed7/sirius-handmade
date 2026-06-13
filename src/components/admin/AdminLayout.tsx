@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import AdminSidebar from './AdminSidebar';
 import { Menu } from 'lucide-react';
+import SiriusAIChat from './SiriusAIChat';
 
 export default function AdminLayout() {
   const { isAdmin, loading } = useAuth();
@@ -36,6 +37,9 @@ export default function AdminLayout() {
           <Outlet />
         </div>
       </div>
+
+      {/* Floating AI Chat Assistant */}
+      <SiriusAIChat />
     </div>
   );
 }
