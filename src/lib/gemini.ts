@@ -5,13 +5,12 @@ async function callGemini(prompt: string): Promise<string> {
     throw new Error('مفتاح API الخاص بـ Gemini غير مهيأ في ملف البيئة VITE_GEMINI_API_KEY');
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
     },
     body: JSON.stringify({
       contents: [{

@@ -218,7 +218,7 @@ export async function sendMessageToSiriusAgent(chatHistory: ChatMessage[], userT
     }]
   };
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
 
   // Start Agent Loop
   let loopCount = 0;
@@ -230,7 +230,6 @@ export async function sendMessageToSiriusAgent(chatHistory: ChatMessage[], userT
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
       },
       body: JSON.stringify({
         contents: currentHistory,
