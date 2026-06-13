@@ -18,7 +18,7 @@ async function callGemini(promptText: string): Promise<string> {
     body: JSON.stringify({
       contents: [{
         parts: [{
-          text: prompt
+          text: promptText
         }]
       }],
       generationConfig: {
