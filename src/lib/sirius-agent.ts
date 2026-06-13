@@ -230,6 +230,7 @@ export async function sendMessageToSiriusAgent(chatHistory: ChatMessage[], userT
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
       },
       body: JSON.stringify({
         contents: currentHistory,
