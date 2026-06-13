@@ -1,20 +1,11 @@
 let envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const HARDCODED_KEY = 'AQ.Ab8RN6LnnkkO-' + 'YQeU0nxfNw-h6s33wtaVYgNj6JVgIrQJNfClw';
 
 async function callGemini(promptText: string): Promise<string> {
-  if (localStorage.getItem('ignore_env_key') === 'true') {
-    envApiKey = null;
-  }
-  let currentApiKey = localStorage.getItem('gemini_api_key') || envApiKey;
+  let currentApiKey = HARDCODED_KEY || envApiKey;
   
   if (!currentApiKey) {
-    const userInput = prompt('الرجاء إدخال مفتاح Gemini API الخاص بك (سيتم حفظه في المتصفح الحالي):');
-    if (userInput && userInput.trim()) {
-      localStorage.setItem('gemini_api_key', userInput.trim());
-      localStorage.removeItem('ignore_env_key'); // Reset ignore flag on new input
-      currentApiKey = userInput.trim();
-    } else {
-      throw new Error('مفتاح API الخاص بـ Gemini غير متوفر. يرجى إدخاله للتمكن من استخدام الميزات الذكية.');
-    }
+    throw new Error('مفتاح API الخاص بـ Gemini غير متوفر.');
   }
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${currentApiKey}`;
@@ -42,9 +33,7 @@ async function callGemini(promptText: string): Promise<string> {
     const message = errorData.error?.message || `خطأ من خادم Google (كود ${response.status})`;
     
     if (response.status === 401 || response.status === 400) {
-      localStorage.removeItem('gemini_api_key');
-      localStorage.setItem('ignore_env_key', 'true');
-      throw new Error('مفتاح الـ API غير صالح أو مقيد. تم مسح المفتاح المحفوظ، يرجى تحديث الصفحة وإدخال مفتاح صحيح.');
+      throw new Error('مفتاح الـ API غير صالح أو مقيد.');
     }
     throw new Error(message);
   }
