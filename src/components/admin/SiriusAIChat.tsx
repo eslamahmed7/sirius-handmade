@@ -109,7 +109,7 @@ export default function SiriusAIChat() {
           className="w-20 h-20 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 relative group animate-bounce p-0 bg-transparent border-none focus:outline-none"
           style={{ animationDuration: '3s' }}
         >
-          <img src="/female_robot_full_body.png" alt="AI Assistant" className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)] group-hover:drop-shadow-[0_12px_24px_rgba(236,72,153,0.4)] transition-all duration-300" />
+          <img src="/female_robot_full_body.png?v=4" alt="AI Assistant" className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)] group-hover:drop-shadow-[0_12px_24px_rgba(236,72,153,0.4)] transition-all duration-300" />
           <span className="absolute top-2 right-2 flex h-4 w-4 z-10">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-4 w-4 bg-primary-500 border-2 border-white dark:border-gray-900"></span>
@@ -129,7 +129,7 @@ export default function SiriusAIChat() {
           <div className="p-4 bg-primary-600 text-white flex items-center justify-between shadow-md">
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden border border-white/20 shadow-sm relative group">
-                <img src="/bot_avatar_with_logo.png" alt="Bot Avatar" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                <img src="/bot_avatar_with_logo.png?v=4" alt="Bot Avatar" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
               </div>
               <div>
                 <h3 className="font-bold text-sm leading-none">Sirius AI</h3>
@@ -160,7 +160,7 @@ export default function SiriusAIChat() {
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center px-4 space-y-6">
                 <div className="w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden shadow-md border border-gray-100 dark:border-gray-800">
-                  <img src="/bot_avatar_with_logo.png" alt="Bot Avatar" className="w-full h-full object-cover" />
+                  <img src="/bot_avatar_with_logo.png?v=4" alt="Bot Avatar" className="w-full h-full object-cover" />
                 </div>
                 <div className="space-y-2">
                   <h4 className="font-bold text-gray-900 dark:text-white text-base">مرحباً بك في Sirius AI! 👋</h4>
@@ -200,7 +200,7 @@ export default function SiriusAIChat() {
                       <div className="flex items-start gap-2.5 max-w-[85%]">
                         {!isUser && (
                           <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800">
-                            <img src="/bot_avatar_with_logo.png" alt="Bot" className="w-full h-full object-cover" />
+                            <img src="/bot_avatar_with_logo.png?v=4" alt="Bot" className="w-full h-full object-cover" />
                           </div>
                         )}
                         <div
@@ -222,7 +222,7 @@ export default function SiriusAIChat() {
                   <div className="flex justify-end animate-pulse">
                     <div className="flex items-start gap-2.5 max-w-[85%]">
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 relative">
-                        <img src="/bot_avatar_with_logo.png" alt="Bot" className="w-full h-full object-cover opacity-50" />
+                        <img src="/bot_avatar_with_logo.png?v=4" alt="Bot" className="w-full h-full object-cover opacity-50" />
                         <Loader2 size={16} className="animate-spin absolute text-primary-600 dark:text-primary-400" />
                       </div>
                       <div className="p-3 bg-white dark:bg-darkbg-lighter text-gray-500 dark:text-gray-400 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl rounded-tl-none text-xs flex items-center gap-2">
