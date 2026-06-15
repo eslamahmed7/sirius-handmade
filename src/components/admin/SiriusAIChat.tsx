@@ -106,16 +106,16 @@ export default function SiriusAIChat() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-16 h-16 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 relative group animate-bounce border-2 border-primary-500 overflow-hidden"
+          className="w-20 h-20 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 relative group animate-bounce p-0 bg-transparent border-none focus:outline-none"
           style={{ animationDuration: '3s' }}
         >
-          <img src="/female_robot_full_body.png" alt="AI Assistant" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-          <span className="absolute -top-1 -right-1 flex h-4 w-4 z-10">
+          <img src="/female_robot_full_body.png" alt="AI Assistant" className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)] group-hover:drop-shadow-[0_12px_24px_rgba(236,72,153,0.4)] transition-all duration-300" />
+          <span className="absolute top-2 right-2 flex h-4 w-4 z-10">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-4 w-4 bg-primary-500 border-2 border-white dark:border-gray-900"></span>
           </span>
           {/* Tooltip */}
-          <span className="absolute right-16 bg-gray-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md pointer-events-none">
+          <span className="absolute right-20 bg-gray-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md pointer-events-none">
             مساعد الذكاء الاصطناعي Sirius AI ✨
           </span>
         </button>
