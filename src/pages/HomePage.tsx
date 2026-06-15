@@ -310,7 +310,7 @@ export default function HomePage() {
         </AnimatedSection>
         
         {/* Floating WhatsApp Button */}
-        <div className="fixed bottom-6 rtl:left-6 ltr:right-6 z-50 flex flex-col rtl:items-end ltr:items-end">
+        <div className="fixed bottom-24 md:bottom-6 rtl:left-6 ltr:right-6 z-50 flex flex-col rtl:items-end ltr:items-end pb-safe">
           {waMenuOpen && (
             <div className="mb-4 bg-white dark:bg-darkbg-card rounded-2xl shadow-2xl border border-gray-200 dark:border-darkbg-lighter p-2 w-64 overflow-hidden animate-in fade-in slide-in-from-bottom-4">
               <div className="text-sm font-bold text-gray-900 dark:text-white px-3 py-2 border-b border-gray-100 dark:border-darkbg-lighter mb-1">

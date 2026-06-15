@@ -106,13 +106,13 @@ export default function SiriusAIChat() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 bg-primary-600 hover:bg-primary-700 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 relative group animate-bounce"
+          className="w-16 h-16 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 relative group animate-bounce border-2 border-primary-500 overflow-hidden"
           style={{ animationDuration: '3s' }}
         >
-          <Sparkles size={24} className="group-hover:rotate-12 transition-transform" />
-          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+          <img src="/female_robot_full_body.png" alt="AI Assistant" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+          <span className="absolute -top-1 -right-1 flex h-4 w-4 z-10">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-primary-500"></span>
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-primary-500 border-2 border-white dark:border-gray-900"></span>
           </span>
           {/* Tooltip */}
           <span className="absolute right-16 bg-gray-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md pointer-events-none">
@@ -128,8 +128,8 @@ export default function SiriusAIChat() {
           {/* Header */}
           <div className="p-4 bg-primary-600 text-white flex items-center justify-between shadow-md">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center animate-pulse">
-                <Bot size={20} className="text-white" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden border border-white/20 shadow-sm relative group">
+                <img src="/bot_avatar_with_logo.png" alt="Bot Avatar" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
               </div>
               <div>
                 <h3 className="font-bold text-sm leading-none">Sirius AI</h3>
@@ -159,8 +159,8 @@ export default function SiriusAIChat() {
           <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50/50 dark:bg-darkbg/30">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center px-4 space-y-6">
-                <div className="w-16 h-16 bg-primary-50 dark:bg-primary-900/20 rounded-2xl flex items-center justify-center text-primary-600 dark:text-primary-400">
-                  <Bot size={36} />
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center overflow-hidden shadow-md border border-gray-100 dark:border-gray-800">
+                  <img src="/bot_avatar_with_logo.png" alt="Bot Avatar" className="w-full h-full object-cover" />
                 </div>
                 <div className="space-y-2">
                   <h4 className="font-bold text-gray-900 dark:text-white text-base">مرحباً بك في Sirius AI! 👋</h4>
@@ -199,8 +199,8 @@ export default function SiriusAIChat() {
                     >
                       <div className="flex items-start gap-2.5 max-w-[85%]">
                         {!isUser && (
-                          <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <Bot size={16} />
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800">
+                            <img src="/bot_avatar_with_logo.png" alt="Bot" className="w-full h-full object-cover" />
                           </div>
                         )}
                         <div
@@ -221,8 +221,9 @@ export default function SiriusAIChat() {
                 {loading && (
                   <div className="flex justify-end animate-pulse">
                     <div className="flex items-start gap-2.5 max-w-[85%]">
-                      <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Loader2 size={16} className="animate-spin" />
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 relative">
+                        <img src="/bot_avatar_with_logo.png" alt="Bot" className="w-full h-full object-cover opacity-50" />
+                        <Loader2 size={16} className="animate-spin absolute text-primary-600 dark:text-primary-400" />
                       </div>
                       <div className="p-3 bg-white dark:bg-darkbg-lighter text-gray-500 dark:text-gray-400 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl rounded-tl-none text-xs flex items-center gap-2">
                         <span>جاري معالجة الطلب وتحديث البيانات...</span>
