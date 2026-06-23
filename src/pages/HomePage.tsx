@@ -154,23 +154,23 @@ export default function HomePage() {
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 w-full text-center flex flex-col items-center">
             
-            <div className="relative mb-6">
+            <div className="relative mb-6 flex flex-col items-center">
+              {/* Large Star spanning both titles */}
+              <svg 
+                viewBox="0 0 36 60" 
+                className="w-16 h-24 sm:w-20 sm:h-32 md:w-24 md:h-40 absolute hidden md:block rtl:left-full rtl:ml-6 ltr:right-full ltr:mr-6 top-1/2 -translate-y-1/2 drop-shadow-md"
+                aria-hidden="true"
+              >
+                <path d="M 0,35 Q 18,35 18,0 Q 18,35 36,35 Q 18,35 18,60 Q 18,35 0,35 Z" fill="#FFDE43" />
+              </svg>
+
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-2">
                 {t('home.hero_title')}
               </h1>
               {t('home.hero_subtitle') && (
-                <div className="relative flex items-center justify-center">
-                  <svg 
-                    viewBox="0 0 36 60" 
-                    className="w-10 h-16 absolute hidden md:block rtl:left-full rtl:-ml-2 ltr:right-full ltr:-mr-2 drop-shadow-sm"
-                    aria-hidden="true"
-                  >
-                    <path d="M 0,35 Q 18,35 18,0 Q 18,35 36,35 Q 18,35 18,60 Q 18,35 0,35 Z" fill="#FFDE43" />
-                  </svg>
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-primary-400 leading-tight">
-                    {t('home.hero_subtitle')}
-                  </h1>
-                </div>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-primary-400 leading-tight">
+                  {t('home.hero_subtitle')}
+                </h1>
               )}
             </div>
 
