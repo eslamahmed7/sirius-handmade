@@ -160,7 +160,13 @@ export default function HomePage() {
               </h1>
               {t('home.hero_subtitle') && (
                 <div className="relative flex items-center justify-center">
-                  <Heart size={40} className="text-primary-500 stroke-[1.5] absolute hidden md:block rtl:left-full rtl:ml-4 ltr:right-full ltr:mr-4" />
+                  <svg 
+                    viewBox="0 0 36 60" 
+                    className="w-10 h-16 absolute hidden md:block rtl:left-full rtl:-ml-2 ltr:right-full ltr:-mr-2 drop-shadow-sm"
+                    aria-hidden="true"
+                  >
+                    <path d="M 0,35 Q 18,35 18,0 Q 18,35 36,35 Q 18,35 18,60 Q 18,35 0,35 Z" fill="#FFDE43" />
+                  </svg>
                   <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-primary-400 leading-tight">
                     {t('home.hero_subtitle')}
                   </h1>
